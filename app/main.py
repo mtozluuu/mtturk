@@ -1,4 +1,5 @@
 import os
+import warnings
 
 from fastapi import FastAPI, Request
 from starlette.middleware.sessions import SessionMiddleware
@@ -11,7 +12,14 @@ from app.routers import auth, admin, flights, reports
 
 load_dotenv()
 
-SESSION_SECRET_KEY = os.environ.get("SESSION_SECRET_KEY", "change-me")
+SESSION_SECRET_KEY = os.environ.get("SESSION_SECRET_KEY", "")
+if not SESSION_SECRET_KEY:
+    warnings.warn(
+        "SESSION_SECRET_KEY is not set. Using an insecure default. "
+        "Set SESSION_SECRET_KEY in your environment before deploying.",
+        stacklevel=1,
+    )
+    SESSION_SECRET_KEY = "insecure-dev-key-do-not-use-in-production"
 
 app = FastAPI(title="Flight Management API", version="1.0.0")
 

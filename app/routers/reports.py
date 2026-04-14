@@ -12,6 +12,15 @@ from app.models import CrewAssignment, User
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 
+def _parse_utc_datetime(value: str) -> datetime:
+    """Parse an ISO 8601 datetime string and return a UTC-aware datetime."""
+    normalised = value.replace("Z", "+00:00")
+    dt = datetime.fromisoformat(normalised)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
 @router.get("/seat-time")
 def seat_time_report(
     start: str,
@@ -27,8 +36,8 @@ def seat_time_report(
     - Pilots only see their own seat time (user_id param is ignored).
     """
     try:
-        start_dt = datetime.fromisoformat(start).replace(tzinfo=timezone.utc) if "+" not in start and "Z" not in start else datetime.fromisoformat(start.replace("Z", "+00:00"))
-        end_dt = datetime.fromisoformat(end).replace(tzinfo=timezone.utc) if "+" not in end and "Z" not in end else datetime.fromisoformat(end.replace("Z", "+00:00"))
+        start_dt = _parse_utc_datetime(start)
+        end_dt = _parse_utc_datetime(end)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
