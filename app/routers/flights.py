@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy import and_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -136,7 +137,7 @@ def change_crew(
             detail=f"Seat {seat} requires a user with role '{required_role}'",
         )
 
-    # End any active assignment for this seat on this flight
+    # End any active assignment for this seat on this flight (row-lock to prevent races)
     active = (
         db.query(CrewAssignment)
         .filter(
@@ -144,6 +145,7 @@ def change_crew(
             CrewAssignment.seat == seat,
             CrewAssignment.end_time.is_(None),
         )
+        .with_for_update()
         .first()
     )
     now = datetime.now(timezone.utc)
@@ -157,7 +159,14 @@ def change_crew(
         start_time=now,
     )
     db.add(assignment)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Seat already actively assigned on this flight",
+        )
     db.refresh(assignment)
     return {
         "id": assignment.id,
@@ -228,7 +237,7 @@ def create_maintenance_log(
     body: MaintenanceLogRequest,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role("admin", "technician")),
 ):
     _get_flight_or_404(flight_id, db)
     log = MaintenanceLog(
