@@ -1,0 +1,8 @@
+fastapi==0.135.3
+uvicorn[standard]==0.29.0
+sqlalchemy==2.0.30
+psycopg2-binary==2.9.9
+itsdangerous==2.2.0
+starlette==0.52.1
+python-dotenv==1.0.1
+passlib[bcrypt]==1.7.4
