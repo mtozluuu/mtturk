@@ -1,6 +1,7 @@
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
+    username VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'pilot', 'copilot', 'technician')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

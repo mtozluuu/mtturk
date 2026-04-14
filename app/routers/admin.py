@@ -16,6 +16,7 @@ VALID_ROLES = {"admin", "pilot", "copilot", "technician"}
 
 
 class CreateUserRequest(BaseModel):
+    username: str
     password: str
     role: str
 
@@ -33,13 +34,14 @@ def create_user(
             detail=f"Invalid role. Must be one of: {', '.join(sorted(VALID_ROLES))}",
         )
     user = User(
+        username=body.username,
         password_hash=pwd_context.hash(body.password),
         role=body.role,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-    return {"id": user.id, "role": user.role}
+    return {"id": user.id, "username": user.username, "role": user.role}
 
 
 @router.get("/users")
@@ -52,4 +54,4 @@ def list_users(
     if role is not None:
         query = query.filter(User.role == role)
     users = query.all()
-    return [{"id": u.id, "role": u.role} for u in users]
+    return [{"id": u.id, "username": u.username, "role": u.role} for u in users]

@@ -14,7 +14,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class LoginRequest(BaseModel):
-    id: int
+    username: str
     password: str
 
 
@@ -25,7 +25,7 @@ class ChangePasswordRequest(BaseModel):
 
 @router.post("/login")
 def login(body: LoginRequest, request: Request, db: Session = Depends(get_db)):
-    user: Optional[User] = db.query(User).filter(User.id == body.id).first()
+    user: Optional[User] = db.query(User).filter(User.username == body.username).first()
     if user is None or not pwd_context.verify(body.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     request.session["user_id"] = user.id
@@ -41,7 +41,7 @@ def logout(request: Request):
 @router.get("/me")
 def me(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request)
-    return {"id": user.id, "role": user.role}
+    return {"id": user.id, "username": user.username, "role": user.role}
 
 
 @router.post("/change-password")

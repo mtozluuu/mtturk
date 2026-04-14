@@ -1,5 +1,6 @@
 import os
 import warnings
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
@@ -11,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db, SessionLocal
 from app.models import Flight, User
 from app.routers import auth, admin, flights, reports
+from app.seed import seed_admin
 
 load_dotenv()
 
@@ -25,7 +27,14 @@ if not SESSION_SECRET_KEY:
 
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app = FastAPI(title="Flight Management API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    seed_admin()
+    yield
+
+
+app = FastAPI(title="Flight Management API", version="1.0.0", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory=os.path.join(_BASE_DIR, "static")), name="static")
 
