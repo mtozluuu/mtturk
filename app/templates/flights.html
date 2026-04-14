@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Flights – Flight Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Flights</h2>
+    {% if flights %}
+    <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+        <thead>
+            <tr style="background:#ebf8ff; text-align:left;">
+                <th style="padding:0.5rem 0.75rem;">ID</th>
+                <th style="padding:0.5rem 0.75rem;">Flight #</th>
+                <th style="padding:0.5rem 0.75rem;">Date</th>
+                <th style="padding:0.5rem 0.75rem;">Departure</th>
+                <th style="padding:0.5rem 0.75rem;">Arrival</th>
+                <th style="padding:0.5rem 0.75rem;">Sched. Dep.</th>
+                <th style="padding:0.5rem 0.75rem;">Sched. Arr.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in flights %}
+            <tr style="border-top:1px solid #e2e8f0;">
+                <td style="padding:0.5rem 0.75rem;">{{ f.id }}</td>
+                <td style="padding:0.5rem 0.75rem;">{{ f.flight_no }}</td>
+                <td style="padding:0.5rem 0.75rem;">{{ f.flight_date }}</td>
+                <td style="padding:0.5rem 0.75rem;">{{ f.departure_airport }}</td>
+                <td style="padding:0.5rem 0.75rem;">{{ f.arrival_airport }}</td>
+                <td style="padding:0.5rem 0.75rem;">{{ f.sched_dep }}</td>
+                <td style="padding:0.5rem 0.75rem;">{{ f.sched_arr }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="alert alert-info">
+        No flights to display. <a href="/login">Log in</a> to view flights, or use the
+        <a href="/docs">API Docs</a> to add flights via the REST API.
+    </p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>API</h2>
+    <p>Flight data is managed via the REST API. See <a href="/docs">Swagger UI</a> for full documentation.</p>
+    <div class="btn-group">
+        <a class="btn btn-secondary" href="/docs">Swagger UI</a>
+        <a class="btn btn-secondary" href="/login">Login</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Home – Flight Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome to Flight Management</h2>
+    <p>Use the links below to navigate the application or explore the API documentation.</p>
+    <div class="btn-group">
+        <a class="btn btn-primary" href="/flights-ui">Flights</a>
+        <a class="btn btn-primary" href="/login">Login</a>
+        <a class="btn btn-secondary" href="/docs">Swagger UI</a>
+        <a class="btn btn-secondary" href="/redoc">ReDoc</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>API Health</h2>
+    <p>The JSON API is available at <a href="/health">/health</a>.</p>
+</div>
+{% endblock %}

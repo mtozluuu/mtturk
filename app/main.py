@@ -2,12 +2,14 @@ import os
 import warnings
 
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 
 from app.database import get_db, SessionLocal
-from app.models import User
+from app.models import Flight, User
 from app.routers import auth, admin, flights, reports
 
 load_dotenv()
@@ -21,7 +23,13 @@ if not SESSION_SECRET_KEY:
     )
     SESSION_SECRET_KEY = "insecure-dev-key-do-not-use-in-production"
 
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 app = FastAPI(title="Flight Management API", version="1.0.0")
+
+app.mount("/static", StaticFiles(directory=os.path.join(_BASE_DIR, "static")), name="static")
+
+templates = Jinja2Templates(directory=os.path.join(_BASE_DIR, "templates"))
 
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET_KEY)
 
@@ -48,6 +56,30 @@ app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(flights.router)
 app.include_router(reports.router)
+
+
+@app.get("/", include_in_schema=False)
+def index(request: Request):
+    return templates.TemplateResponse(request, "index.html", {})
+
+
+@app.get("/login", include_in_schema=False)
+def login_page(request: Request):
+    return templates.TemplateResponse(request, "login.html", {})
+
+
+@app.get("/flights-ui", include_in_schema=False)
+def flights_ui(request: Request):
+    """HTML page for browsing flights. Renders server-side with data when user is authenticated."""
+    flight_list = []
+    user = getattr(request.state, "user", None)
+    if user is not None:
+        _db = SessionLocal()
+        try:
+            flight_list = _db.query(Flight).order_by(Flight.sched_dep).all()
+        finally:
+            _db.close()
+    return templates.TemplateResponse(request, "flights.html", {"flights": flight_list})
 
 
 @app.get("/health")

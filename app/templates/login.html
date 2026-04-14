@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Login – Flight Management{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 420px; margin: 0 auto;">
+    <h2>Login</h2>
+    <div class="alert alert-info">
+        Use the API endpoint <code>POST /auth/login</code> to authenticate programmatically.
+    </div>
+    <form method="post" action="/auth/login">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" placeholder="Enter your username" required />
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" placeholder="Enter your password" required />
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-primary" type="submit">Sign In</button>
+            <a class="btn btn-secondary" href="/">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
