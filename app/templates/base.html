@@ -300,6 +300,8 @@
             <div class="alert">{{ t("msg.error.user_not_found") }}</div>
         {% elif error == "flight_not_found" %}
             <div class="alert">{{ t("msg.error.flight_not_found") }}</div>
+        {% elif error == "flight_not_active" %}
+            <div class="alert">{{ t("msg.error.flight_not_active") }}</div>
         {% elif error == "invalid_seat" %}
             <div class="alert">{{ t("msg.error.invalid_seat") }}</div>
         {% elif error == "role_mismatch" %}

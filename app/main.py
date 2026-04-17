@@ -38,6 +38,7 @@ TRANSLATIONS = {
         "msg.error.invalid_role": "Invalid role selected.",
         "msg.error.user_not_found": "User not found.",
         "msg.error.flight_not_found": "Flight not found.",
+        "msg.error.flight_not_active": "Crew handover is only allowed for active flights.",
         "msg.error.invalid_seat": "Invalid seat selection.",
         "msg.error.role_mismatch": "Selected user roles are not compatible.",
         "msg.error.empty_description": "Maintenance description cannot be empty.",
@@ -150,6 +151,7 @@ TRANSLATIONS = {
         "msg.error.invalid_role": "Geçersiz rol seçildi.",
         "msg.error.user_not_found": "Kullanıcı bulunamadı.",
         "msg.error.flight_not_found": "Uçuş bulunamadı.",
+        "msg.error.flight_not_active": "Ekip devri yalnızca aktif uçuşlarda yapılabilir.",
         "msg.error.invalid_seat": "Geçersiz koltuk seçimi.",
         "msg.error.role_mismatch": "Seçilen kullanıcı rolleri uygun değil.",
         "msg.error.empty_description": "Bakım açıklaması boş bırakılamaz.",
@@ -339,6 +341,10 @@ def format_duration_hms(total_seconds: int) -> str:
     minutes = (total_seconds % 3600) // 60
     seconds = total_seconds % 60
     return f"{hours:02}:{minutes:02}:{seconds:02}"
+
+
+def is_flight_active(flight: Flight) -> bool:
+    return flight.actual_dep is not None and flight.actual_arr is None
 
 
 def build_crew_report_data(
@@ -806,6 +812,11 @@ def assign_flight_crew(
     flight = db.query(Flight).filter(Flight.id == flight_id).first()
     if flight is None:
         return RedirectResponse(url="/admin-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
+    if not is_flight_active(flight):
+        return RedirectResponse(
+            url=f"/admin-ui/flights/{flight_id}/crew?error=flight_not_active",
+            status_code=HTTP_303_SEE_OTHER,
+        )
 
     captain_user = db.query(User).filter(User.id == captain_user_id).first()
     first_officer_user = db.query(User).filter(User.id == first_officer_user_id).first()
@@ -822,8 +833,6 @@ def assign_flight_crew(
             status_code=HTTP_303_SEE_OTHER,
         )
 
-    now = datetime.utcnow()
-
     active_captain = (
         db.query(CrewAssignment)
         .filter(
@@ -833,8 +842,6 @@ def assign_flight_crew(
         )
         .first()
     )
-    if active_captain:
-        active_captain.end_time = now
 
     active_first_officer = (
         db.query(CrewAssignment)
@@ -845,6 +852,23 @@ def assign_flight_crew(
         )
         .first()
     )
+
+    if (
+        active_captain
+        and active_first_officer
+        and active_captain.user_id == captain_user_id
+        and active_first_officer.user_id == first_officer_user_id
+    ):
+        return RedirectResponse(
+            url=f"/admin-ui/flights/{flight_id}/crew?success=crew_updated",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    now = datetime.utcnow()
+
+    if active_captain:
+        active_captain.end_time = now
+
     if active_first_officer:
         active_first_officer.end_time = now
 
