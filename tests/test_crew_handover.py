@@ -162,6 +162,20 @@ def test_handover_changes_only_pilot(test_env):
     session.close()
 
 
+def test_handover_page_shows_current_crew_and_helper_text(test_env):
+    client, _, ids = test_env
+    response = client.get(f"/admin-ui/flights/{ids['active_flight_id']}/crew")
+
+    assert response.status_code == 200
+    assert "Mevcut Kaptan" in response.text
+    assert "Mevcut Yardımcı Pilot" in response.text
+    assert "pilot_1" in response.text
+    assert "copilot_1" in response.text
+    assert "Yeni Kaptan (aynı kalacaksa boş bırakın)" in response.text
+    assert "Yeni Yardımcı Pilot (aynı kalacaksa boş bırakın)" in response.text
+    assert "Ekip Devrini Uygula" in response.text
+
+
 def test_handover_changes_only_copilot(test_env):
     client, SessionLocal, ids = test_env
     response = client.post(

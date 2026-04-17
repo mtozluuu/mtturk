@@ -75,6 +75,28 @@
         border-radius: 10px;
     }
 
+    .handover-summary {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .handover-summary p {
+        margin: 0.35rem 0;
+    }
+
+    .handover-helper {
+        margin-bottom: 0.75rem;
+        color: #4b5563;
+        font-size: 0.95rem;
+    }
+
+    .handover-helper p {
+        margin: 0.25rem 0;
+    }
+
     .table-wrap {
         width: 100%;
         overflow-x: auto;
@@ -177,12 +199,45 @@
 
 <div class="card">
     <h3 class="section-title">{{ t("crew_assignment.handover") }}</h3>
+    {% set ns = namespace(captain=None, first_officer=None) %}
+    {% for assignment in active_assignments %}
+        {% if assignment.seat == "CAPTAIN" %}
+            {% set ns.captain = assignment %}
+        {% elif assignment.seat == "FIRST_OFFICER" %}
+            {% set ns.first_officer = assignment %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="handover-summary">
+        <p>
+            <strong>{{ t("crew_assignment.current_captain") }}:</strong>
+            {% if ns.captain %}
+                {{ ns.captain.user.username if ns.captain.user else ("User #" ~ ns.captain.user_id) }}
+            {% else %}
+                -
+            {% endif %}
+        </p>
+        <p>
+            <strong>{{ t("crew_assignment.current_first_officer") }}:</strong>
+            {% if ns.first_officer %}
+                {{ ns.first_officer.user.username if ns.first_officer.user else ("User #" ~ ns.first_officer.user_id) }}
+            {% else %}
+                -
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="handover-helper">
+        <p>{{ t("crew_assignment.handover_help_optional") }}</p>
+        <p>{{ t("crew_assignment.handover_help_empty") }}</p>
+        <p>{{ t("crew_assignment.handover_help_required") }}</p>
+    </div>
 
     <form method="post" action="/admin-ui/flights/{{ flight.id }}/crew" class="assign-form">
         <div class="field">
-            <label for="handover_captain_user_id">{{ t("crew_assignment.captain") }}</label>
+            <label for="handover_captain_user_id">{{ t("crew_assignment.new_captain_optional") }}</label>
             <select id="handover_captain_user_id" name="captain_user_id">
-                <option value=""></option>
+                <option value="">{{ t("crew_assignment.keep_current") }}</option>
                 {% for crew_user in pilots %}
                 <option value="{{ crew_user.id }}">{{ crew_user.username }}</option>
                 {% endfor %}
@@ -190,9 +245,9 @@
         </div>
 
         <div class="field">
-            <label for="handover_first_officer_user_id">{{ t("crew_assignment.first_officer") }}</label>
+            <label for="handover_first_officer_user_id">{{ t("crew_assignment.new_first_officer_optional") }}</label>
             <select id="handover_first_officer_user_id" name="first_officer_user_id">
-                <option value=""></option>
+                <option value="">{{ t("crew_assignment.keep_current") }}</option>
                 {% for crew_user in copilots %}
                 <option value="{{ crew_user.id }}">{{ crew_user.username }}</option>
                 {% endfor %}
