@@ -819,25 +819,26 @@ def assign_flight_crew(
     flight = db.query(Flight).filter(Flight.id == flight_id).first()
     if flight is None:
         return RedirectResponse(url="/admin-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
+    crew_page_url = f"/admin-ui/flights/{flight.id}/crew"
 
     captain_user = db.query(User).filter(User.id == captain_user_id).first()
     first_officer_user = db.query(User).filter(User.id == first_officer_user_id).first()
 
     if captain_user is None or first_officer_user is None:
         return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=user_not_found",
+            url=f"{crew_page_url}?error=user_not_found",
             status_code=HTTP_303_SEE_OTHER,
         )
 
     if captain_user_id == first_officer_user_id:
         return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=same_personnel",
+            url=f"{crew_page_url}?error=same_personnel",
             status_code=HTTP_303_SEE_OTHER,
         )
 
     if captain_user.role != "pilot" or first_officer_user.role != "copilot":
         return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=role_mismatch",
+            url=f"{crew_page_url}?error=role_mismatch",
             status_code=HTTP_303_SEE_OTHER,
         )
 
@@ -887,7 +888,7 @@ def assign_flight_crew(
     db.commit()
 
     return RedirectResponse(
-        url=f"/admin-ui/flights/{flight_id}/crew?success=crew_updated",
+        url=f"{crew_page_url}?success=crew_updated",
         status_code=HTTP_303_SEE_OTHER,
     )
 
@@ -907,19 +908,20 @@ def change_flight_crew(
     if current_user.role != "admin":
         return RedirectResponse(url="/flights-ui", status_code=HTTP_303_SEE_OTHER)
 
-    if captain_user_id is None or first_officer_user_id is None:
-        return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=missing_crew_selection",
-            status_code=HTTP_303_SEE_OTHER,
-        )
-
     flight = db.query(Flight).filter(Flight.id == flight_id).first()
     if flight is None:
         return RedirectResponse(url="/admin-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
+    crew_page_url = f"/admin-ui/flights/{flight.id}/crew"
+
+    if captain_user_id is None or first_officer_user_id is None:
+        return RedirectResponse(
+            url=f"{crew_page_url}?error=missing_crew_selection",
+            status_code=HTTP_303_SEE_OTHER,
+        )
 
     if captain_user_id == first_officer_user_id:
         return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=same_personnel",
+            url=f"{crew_page_url}?error=same_personnel",
             status_code=HTTP_303_SEE_OTHER,
         )
 
@@ -928,13 +930,13 @@ def change_flight_crew(
 
     if captain_user is None or first_officer_user is None:
         return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=user_not_found",
+            url=f"{crew_page_url}?error=user_not_found",
             status_code=HTTP_303_SEE_OTHER,
         )
 
     if captain_user.role != "pilot" or first_officer_user.role != "copilot":
         return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=role_mismatch",
+            url=f"{crew_page_url}?error=role_mismatch",
             status_code=HTTP_303_SEE_OTHER,
         )
 
@@ -984,7 +986,7 @@ def change_flight_crew(
     db.commit()
 
     return RedirectResponse(
-        url=f"/admin-ui/flights/{flight_id}/crew?success=crew_updated",
+        url=f"{crew_page_url}?success=crew_updated",
         status_code=HTTP_303_SEE_OTHER,
     )
 
