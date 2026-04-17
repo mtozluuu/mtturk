@@ -342,8 +342,8 @@ app = FastAPI(title="Flight Management API", version="1.0.0", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory=os.path.join(_BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(_BASE_DIR, "templates"))
-templates.env.globals["t"] = translate
 templates.env.globals["get_locale"] = get_locale
+
 
 
 def resolve_assignment_end_time(assignment: CrewAssignment, flight: Flight) -> datetime:
@@ -477,13 +477,13 @@ def build_crew_report_data(
     return summary_rows, detail_rows
 
 
-app = FastAPI(title="Flight Management API", version="1.0.0", lifespan=lifespan)
-
-app.mount("/static", StaticFiles(directory=os.path.join(_BASE_DIR, "static")), name="static")
-templates = Jinja2Templates(directory=os.path.join(_BASE_DIR, "templates"))
 
 
-templates.env.globals["get_locale"] = get_locale
+
+
+
+
+
 
 app.add_middleware(
     SessionMiddleware,
@@ -498,6 +498,16 @@ app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(flights.router)
 app.include_router(reports.router)
+
+
+
+
+
+
+
+
+
+
 
 
 @app.get("/", include_in_schema=False)
@@ -1055,19 +1065,22 @@ def reports_ui(request: Request):
     return templates.TemplateResponse(
         request,
         "reports.html",
-        {
-            "user": user,
-            "total_flights": total_flights,
-            "today_flights": today_flights,
-            "total_users": total_users,
-            "total_active_assignments": total_active_assignments,
-            "admin_count": admin_count,
-            "pilot_count": pilot_count,
-            "copilot_count": copilot_count,
-            "technician_count": technician_count,
-            "recent_flights": recent_flights,
-        },
-    )
+        i18n_ctx(
+            request,
+            {
+                "user": user,
+                "total_flights": total_flights,
+                "today_flights": today_flights,
+                "total_users": total_users,
+                "total_active_assignments": total_active_assignments,
+                "admin_count": admin_count,
+                "pilot_count": pilot_count,
+                "copilot_count": copilot_count,
+                "technician_count": technician_count,
+                "recent_flights": recent_flights,
+            },
+        ),
+        )
 
 
 @app.get("/reports-ui/crew", include_in_schema=False)
@@ -1105,8 +1118,10 @@ def crew_reports_ui(
         db.close()
 
     return templates.TemplateResponse(
+    request,
+    "crew_reports.html",
+    i18n_ctx(
         request,
-        "crew_reports.html",
         {
             "user": current_user,
             "summary_rows": summary_rows,
@@ -1119,8 +1134,8 @@ def crew_reports_ui(
                 "role": role,
             },
         },
-    )
-
+    ),
+)
 
 @app.get("/reports-ui/crew/export", include_in_schema=False)
 def export_crew_reports(
