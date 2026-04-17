@@ -1,21 +1,135 @@
 {% extends "base.html" %}
 
-{% block title %}Home – Flight Management{% endblock %}
+{% block title %}Flight Management{% endblock %}
+{% block main_class %}page index-page{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background:
+            linear-gradient(rgba(2, 6, 23, 0.34), rgba(2, 6, 23, 0.34)),
+            url("/static/images/wolf.png") no-repeat center center / cover;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    .topbar {
+        background: transparent !important;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-bottom: none;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+
+    .nav a,
+    .brand,
+    .user-badge {
+        color: #ffffff !important;
+    }
+
+    .page.index-page {
+        max-width: 100%;
+        min-height: calc(100vh - 88px);
+        margin: 0;
+        padding: 0 2rem 2.5rem;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .hero {
+        width: 100%;
+        min-height: calc(100vh - 88px);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 6rem;
+    }
+
+    .hero-content {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        background: transparent;
+    }
+
+    .hero-actions {
+        display: flex;
+        justify-content: center;
+    }
+
+    .hero-btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        min-width: 240px;
+        padding: 0.95rem 1.6rem;
+        border-radius: 999px;
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.96);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.22),
+            inset 0 1px 0 rgba(255, 255, 255, 0.10);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.25s ease;
+    }
+
+    .hero-btn-primary:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.28);
+        box-shadow:
+            0 16px 36px rgba(0, 0, 0, 0.28),
+            inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    }
+
+    @media (max-width: 900px) {
+        .page.index-page {
+            padding: 0 1.5rem 2rem;
+        }
+
+        .hero {
+            padding-bottom: 4rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page.index-page {
+            padding: 0 1.2rem 1.8rem;
+        }
+
+        .hero {
+            min-height: calc(100vh - 76px);
+            padding-bottom: 3rem;
+        }
+
+        .hero-btn-primary {
+            width: 100%;
+            max-width: 320px;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>Welcome to Flight Management</h2>
-    <p>Use the links below to navigate the application or explore the API documentation.</p>
-    <div class="btn-group">
-        <a class="btn btn-primary" href="/flights-ui">Flights</a>
-        <a class="btn btn-primary" href="/login">Login</a>
-        <a class="btn btn-secondary" href="/docs">Swagger UI</a>
-        <a class="btn btn-secondary" href="/redoc">ReDoc</a>
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-actions">
+            <a href="/login" class="hero-btn-primary">
+                <span>Sign In</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        </div>
     </div>
-</div>
-
-<div class="card">
-    <h2>API Health</h2>
-    <p>The JSON API is available at <a href="/health">/health</a>.</p>
-</div>
+</section>
 {% endblock %}

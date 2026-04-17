@@ -28,14 +28,25 @@ def login(body: LoginRequest, request: Request, db: Session = Depends(get_db)):
     user: Optional[User] = db.query(User).filter(User.username == body.username).first()
     if user is None or not pwd_context.verify(body.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
     request.session["user_id"] = user.id
     return {"message": "Logged in", "user_id": user.id, "role": user.role}
 
 
 @router.post("/logout")
 def logout(request: Request):
-    request.session.clear()
+    if "session" in request.scope:
+        request.session.clear()
     return {"message": "Logged out"}
+
+
+@router.get("/me")
+def me(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "role": current_user.role,
+    }
 
 
 @router.get("/me")

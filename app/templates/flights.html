@@ -1,51 +1,291 @@
 {% extends "base.html" %}
 
-{% block title %}Flights – Flight Management{% endblock %}
+{% block title %}Flights - Flight Management{% endblock %}
+{% block main_class %}page flights-page{% endblock %}
+
+{% block extra_head %}
+<style>
+body {
+    background:
+        linear-gradient(rgba(2,6,23,0.42), rgba(2,6,23,0.42)),
+        url("/static/images/wolf.png") no-repeat center center / cover;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.topbar {
+    background: transparent !important;
+    backdrop-filter: none;
+    border-bottom: none;
+}
+.nav a,
+.brand,
+.user-badge {
+    color: #fff !important;
+}
+
+.page.flights-page {
+    max-width: 1320px;
+    margin: 0 auto;
+    min-height: calc(100vh - 88px);
+    padding: 2.2rem 1.1rem 4rem 1.1rem;
+}
+
+.flights-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    margin-bottom: 2.7rem;
+    flex-wrap: wrap;
+}
+
+.flights-title {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.03em;
+    text-shadow: 0 8px 30px rgba(0,0,0,0.38);
+}
+
+.flights-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+.flights-search {
+    min-width: 180px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.17);
+    padding: 0.7rem 1.3rem;
+    font-size: 1rem;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    margin-right: 0.4rem;
+    outline: none;
+    box-shadow: none;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.flights-search:focus {
+    background: rgba(255,255,255,0.13);
+    border-color: rgba(96,165,250,0.6);
+}
+.flights-add-btn {
+    padding: 0.72rem 1.45rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg,#2563eb,#3b82f6);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.07rem;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 6px 22px rgba(37,99,235,0.18);
+    margin-left: 0.3rem;
+}
+.flights-add-btn:hover {
+    background: linear-gradient(135deg,#1d4ed8,#2563eb);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 32px rgba(37,99,235,0.28);
+}
+
+.flights-card-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: flex-start;
+    padding-bottom: 3rem;
+}
+
+.flight-card {
+    flex: 1 1 330px;
+    max-width: 360px;
+    min-width: 290px;
+    background: rgba(24, 32, 48, 0.24);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(180, 232, 255, 0.08);
+    box-shadow: 0 14px 36px rgba(18, 27, 31, 0.18), 0 2px 12px 0 rgba(59,130,246,0.11);
+    color: #fff;
+    padding: 2rem 1.4rem 1.35rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+    position: relative;
+    transition: 0.18s all;
+}
+.flight-card:hover {
+    box-shadow: 0 24px 55px rgba(37, 99, 235, 0.24), 0 2px 20px 0 rgba(59,130,246,0.17);
+    border-color: #3b82f6;
+    transform: translateY(-3px) scale(1.027);
+}
+
+.flight-card-badges {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+.badge {
+    display: inline-block;
+    padding: 0.34em 0.76em;
+    font-size: 0.93em;
+    font-weight: 700;
+    color: #a5deff;
+    background: rgba(16, 100, 230, 0.16);
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+    border: 1px solid rgba(59,130,246,0.11);
+}
+.badge-date {
+    background: rgba(96, 165, 250, 0.24);
+    color: #e0eaff;
+    border: none;
+}
+
+.flight-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.flight-no {
+    font-size: 1.24rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.02em;
+}
+.flight-status {
+    font-size: 0.99em;
+    font-weight: 700;
+    padding: 0.34em 0.75em;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: linear-gradient(90deg, #36d399 48%, #38bdf8 100%);
+    border: none;
+    margin-left: 0.2rem;
+}
+.flight-status.completed {
+    background: linear-gradient(90deg, #818cf8 40%, #a7f3d0 100%);
+    color: #232b41;
+}
+.flight-status.cancelled {
+    background: linear-gradient(90deg, #f87171 40%, #fde68a 100%);
+    color: #232b41;
+}
+
+.flight-card-segments {
+    display: flex;
+    align-items: center;
+    gap: 1.3rem;
+    margin-bottom: 0.52rem;
+}
+.flight-segment {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.flight-segment-label {
+    font-size: 1.06em;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: #bae6fd;
+}
+.flight-segment-airport {
+    font-size: 1.4em;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    color: #fff;
+}
+.flight-arrow {
+    font-size: 1.7em;
+    margin: 0 0.5em;
+    color: #3b82f6;
+    opacity: 0.85;
+}
+
+.flight-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 1.1em;
+    font-size: 0.99rem;
+    color: #b7d8ee;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+.flight-card-footer .detail-link {
+    color: #68b5f7;
+    text-decoration: underline;
+    margin-left: 0.18em;
+    font-weight: 600;
+    transition: color 0.16s;
+}
+.flight-card-footer .detail-link:hover { color: #fff; }
+
+@media (max-width: 900px) {
+    .flights-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .flights-title { font-size: 2.05rem; }
+    .flights-card-list {gap: 1.2rem;}
+}
+@media (max-width: 600px) {
+    .flight-card {padding: 1rem 0.45rem 1rem 0.6rem; min-width: 100px;max-width:100%;}
+    .flights-header {padding: 0.3rem;}
+    .flights-title {font-size:1.3rem;}
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>Flights</h2>
-    {% if flights %}
-    <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
-        <thead>
-            <tr style="background:#ebf8ff; text-align:left;">
-                <th style="padding:0.5rem 0.75rem;">ID</th>
-                <th style="padding:0.5rem 0.75rem;">Flight #</th>
-                <th style="padding:0.5rem 0.75rem;">Date</th>
-                <th style="padding:0.5rem 0.75rem;">Departure</th>
-                <th style="padding:0.5rem 0.75rem;">Arrival</th>
-                <th style="padding:0.5rem 0.75rem;">Sched. Dep.</th>
-                <th style="padding:0.5rem 0.75rem;">Sched. Arr.</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for f in flights %}
-            <tr style="border-top:1px solid #e2e8f0;">
-                <td style="padding:0.5rem 0.75rem;">{{ f.id }}</td>
-                <td style="padding:0.5rem 0.75rem;">{{ f.flight_no }}</td>
-                <td style="padding:0.5rem 0.75rem;">{{ f.flight_date }}</td>
-                <td style="padding:0.5rem 0.75rem;">{{ f.departure_airport }}</td>
-                <td style="padding:0.5rem 0.75rem;">{{ f.arrival_airport }}</td>
-                <td style="padding:0.5rem 0.75rem;">{{ f.sched_dep }}</td>
-                <td style="padding:0.5rem 0.75rem;">{{ f.sched_arr }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p class="alert alert-info">
-        No flights to display. <a href="/login">Log in</a> to view flights, or use the
-        <a href="/docs">API Docs</a> to add flights via the REST API.
-    </p>
-    {% endif %}
+<div class="flights-header">
+    <div class="flights-title">Uçuşlar</div>
+    <div class="flights-actions">
+        <input class="flights-search" type="text" placeholder="Ara..." />
+        <a href="/flights-ui/new" class="flights-add-btn">+ Yeni Uçuş</a>
+    </div>
 </div>
 
-<div class="card">
-    <h2>API</h2>
-    <p>Flight data is managed via the REST API. See <a href="/docs">Swagger UI</a> for full documentation.</p>
-    <div class="btn-group">
-        <a class="btn btn-secondary" href="/docs">Swagger UI</a>
-        <a class="btn btn-secondary" href="/login">Login</a>
+<div class="flights-card-list">
+    {% for flight in flights %}
+    <div class="flight-card">
+        <div class="flight-card-badges">
+            <span class="badge">{{ flight.flight_no }}</span>
+            <span class="badge badge-date">
+                {{ flight.flight_date.strftime("%d %b %Y") }}
+            </span>
+        </div>
+        <div class="flight-card-header">
+            <div class="flight-no">{{ flight.flight_no }}</div>
+            <div class="flight-status{% if flight.status == 'Tamamlandı' %} completed{% endif %}{% if flight.status == 'İptal' %} cancelled{% endif %}">
+                {{ flight.status or "Planlandı" }}
+            </div>
+        </div>
+        <div class="flight-card-segments">
+            <div class="flight-segment">
+                <span class="flight-segment-label">Kalkış</span>
+                <span class="flight-segment-airport">{{ flight.departure_airport }}</span>
+            </div>
+            <span class="flight-arrow">→</span>
+            <div class="flight-segment">
+                <span class="flight-segment-label">Varış</span>
+                <span class="flight-segment-airport">{{ flight.arrival_airport }}</span>
+            </div>
+        </div>
+        <div class="flight-card-footer">
+            Firma: {{ flight.company or "-" }}
+            <a href="/flight-detail/{{ flight.id }}" class="detail-link">Detay &gt;</a>
+        </div>
     </div>
+    {% else %}
+    <div style="color:#9ec4ef;font-size:1.15rem;padding:2.55rem 1rem;">
+        Kayıtlı uçuş yok.
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

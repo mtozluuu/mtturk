@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t(request, "reports.title") }} - Flight Management{% endblock %}
+
+{% block extra_head %}
+<style>
+    .section-title {
+        margin-bottom: 1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-card {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.2rem;
+    }
+
+    .stat-card h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        color: #374151;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .subtle {
+        color: #6b7280;
+    }
+
+    .action-row {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="section-title">{{ t(request, "reports.title") }}</h2>
+    <p class="subtle">
+        {{ t(request, "reports.description") }}
+    </p>
+
+    <div class="action-row">
+        <a href="/reports-ui/crew" class="btn-primary">{{ t(request, "reports.crew_reports") }}</a>
+        <a href="/flights-ui" class="btn-secondary">Flights</a>
+        {% if user and user.role == "admin" %}
+        <a href="/admin-ui" class="btn-secondary">Admin Panel</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="section-title">{{ t(request, "reports.general_stats") }}</h3>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>{{ t(request, "reports.total_flights") }}</h3>
+            <div class="stat-value">{{ total_flights }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "reports.today_flights") }}</h3>
+            <div class="stat-value">{{ today_flights }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "reports.total_users") }}</h3>
+            <div class="stat-value">{{ total_users }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "reports.active_assignments") }}</h3>
+            <div class="stat-value">{{ total_active_assignments }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="section-title">{{ t(request, "reports.roles") }}</h3>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>{{ t(request, "reports.admins") }}</h3>
+            <div class="stat-value">{{ admin_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "reports.pilots") }}</h3>
+            <div class="stat-value">{{ pilot_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "reports.copilots") }}</h3>
+            <div class="stat-value">{{ copilot_count }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "reports.technicians") }}</h3>
+            <div class="stat-value">{{ technician_count }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="section-title">{{ t(request, "reports.recent_flights") }}</h3>
+
+    {% if recent_flights and recent_flights|length > 0 %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>{{ t(request, "crew_reports.flight_no") }}</th>
+                    <th>{{ t(request, "crew_reports.date") }}</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Scheduled Departure</th>
+                    <th>Scheduled Arrival</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in recent_flights %}
+                <tr>
+                    <td>{{ flight.id }}</td>
+                    <td>{{ flight.flight_no }}</td>
+                    <td>{{ flight.flight_date }}</td>
+                    <td>{{ flight.departure_airport }}</td>
+                    <td>{{ flight.arrival_airport }}</td>
+                    <td>{{ flight.sched_dep }}</td>
+                    <td>{{ flight.sched_arr }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>{{ t(request, "reports.no_flights") }}</p>
+    {% endif %}
+</div>
+{% endblock %}

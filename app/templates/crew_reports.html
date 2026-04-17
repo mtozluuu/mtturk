@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t(request, "crew_reports.title") }} - Flight Management{% endblock %}
+
+{% block extra_head %}
+<style>
+    .section-title {
+        margin-bottom: 1rem;
+    }
+
+    .subtle {
+        color: #6b7280;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-card {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.2rem;
+    }
+
+    .stat-card h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        color: #374151;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .field label {
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+    }
+
+    .field input,
+    .field select {
+        padding: 0.75rem 0.85rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.3rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .badge-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% set total_seconds = summary_rows | sum(attribute='total_seconds') %}
+{% set total_minutes = summary_rows | sum(attribute='total_minutes') %}
+{% set total_assignments = summary_rows | sum(attribute='total_assignments') %}
+{% set total_users = summary_rows | length %}
+{% set unique_flights = detail_rows | map(attribute='flight_id') | unique | list | length %}
+{% set total_hours = total_seconds // 3600 %}
+{% set total_remaining_minutes = (total_seconds % 3600) // 60 %}
+{% set total_remaining_seconds = total_seconds % 60 %}
+
+<div class="card">
+    <h2 class="section-title">{{ t(request, "crew_reports.title") }}</h2>
+    <p class="subtle">
+        {{ t(request, "crew_reports.description") }}
+    </p>
+</div>
+
+<div class="card">
+    <h3 class="section-title">{{ t(request, "crew_reports.summary_cards") }}</h3>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>{{ t(request, "crew_reports.total_crew_minutes") }}</h3>
+            <div class="stat-value">{{ total_minutes }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "crew_reports.total_crew_time") }}</h3>
+            <div class="stat-value">
+                {{ "%02d:%02d:%02d"|format(total_hours, total_remaining_minutes, total_remaining_seconds) }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "crew_reports.total_assignments") }}</h3>
+            <div class="stat-value">{{ total_assignments }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "crew_reports.total_unique_flights") }}</h3>
+            <div class="stat-value">{{ unique_flights }}</div>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ t(request, "crew_reports.total_crew_users") }}</h3>
+            <div class="stat-value">{{ total_users }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="section-title">{{ t(request, "crew_reports.filters") }}</h3>
+
+    <form method="get" action="/reports-ui/crew" class="filter-form">
+        <div class="field">
+            <label for="start_date">{{ t(request, "crew_reports.start_date") }}</label>
+            <input type="date" id="start_date" name="start_date" value="{{ filters.start_date }}" />
+        </div>
+
+        <div class="field">
+            <label for="end_date">{{ t(request, "crew_reports.end_date") }}</label>
+            <input type="date" id="end_date" name="end_date" value="{{ filters.end_date }}" />
+        </div>
+
+        <div class="field">
+            <label for="user_id">{{ t(request, "crew_reports.personnel") }}</label>
+            <select id="user_id" name="user_id">
+                <option value="">{{ t(request, "crew_reports.all") }}</option>
+                {% for crew_user in crew_users %}
+                <option value="{{ crew_user.id }}" {% if filters.user_id == (crew_user.id|string) %}selected{% endif %}>
+                    {{ crew_user.username }} ({{ crew_user.role }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="role">{{ t(request, "crew_reports.role") }}</label>
+            <select id="role" name="role">
+                <option value="">{{ t(request, "crew_reports.all") }}</option>
+                <option value="pilot" {% if filters.role == "pilot" %}selected{% endif %}>pilot</option>
+                <option value="copilot" {% if filters.role == "copilot" %}selected{% endif %}>copilot</option>
+            </select>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn-primary">{{ t(request, "crew_reports.filter") }}</button>
+            <a href="/reports-ui/crew" class="btn-secondary">{{ t(request, "crew_reports.clear") }}</a>
+            <a
+                href="/reports-ui/crew/export?start_date={{ filters.start_date }}&end_date={{ filters.end_date }}&user_id={{ filters.user_id }}&role={{ filters.role }}"
+                class="btn-primary"
+            >
+                {{ t(request, "crew_reports.export") }}
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 class="section-title">{{ t(request, "crew_reports.summary") }}</h3>
+
+    {% if summary_rows and summary_rows|length > 0 %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>{{ t(request, "crew_reports.role") }}</th>
+                    <th>{{ t(request, "crew_reports.total_flights_col") }}</th>
+                    <th>{{ t(request, "crew_reports.total_assignments") }}</th>
+                    <th>{{ t(request, "crew_reports.total_minutes") }}</th>
+                    <th>{{ t(request, "crew_reports.total_time_hms") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in summary_rows %}
+                <tr>
+                    <td>{{ row.user_id }}</td>
+                    <td>{{ row.username }}</td>
+                    <td>{{ row.role }}</td>
+                    <td>{{ row.total_flights }}</td>
+                    <td>{{ row.total_assignments }}</td>
+                    <td>{{ row.total_minutes }}</td>
+                    <td>{{ row.total_hms }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>{{ t(request, "crew_reports.no_records") }}</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h3 class="section-title">{{ t(request, "crew_reports.detail") }}</h3>
+
+    {% if detail_rows and detail_rows|length > 0 %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>{{ t(request, "crew_reports.flight_no") }}</th>
+                    <th>{{ t(request, "crew_reports.date") }}</th>
+                    <th>{{ t(request, "crew_reports.route") }}</th>
+                    <th>{{ t(request, "crew_reports.user") }}</th>
+                    <th>{{ t(request, "crew_reports.role") }}</th>
+                    <th>{{ t(request, "crew_reports.seat") }}</th>
+                    <th>{{ t(request, "crew_reports.start") }}</th>
+                    <th>{{ t(request, "crew_reports.end") }}</th>
+                    <th>{{ t(request, "crew_reports.duration_min") }}</th>
+                    <th>{{ t(request, "crew_reports.duration_hms") }}</th>
+                    <th>{{ t(request, "crew_reports.status") }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in detail_rows %}
+                <tr>
+                    <td>{{ row.flight_no }}</td>
+                    <td>{{ row.flight_date }}</td>
+                    <td>{{ row.departure_airport }} → {{ row.arrival_airport }}</td>
+                    <td>{{ row.username }}</td>
+                    <td>{{ row.role }}</td>
+                    <td>{{ row.seat }}</td>
+                    <td>{{ row.start_time }}</td>
+                    <td>{{ row.end_time or "-" }}</td>
+                    <td>{{ row.duration_minutes }}</td>
+                    <td>{{ row.duration_hms }}</td>
+                    <td>
+                        {% if row.is_active %}
+                            <span class="badge badge-active">{{ t(request, "crew_reports.active") }}</span>
+                        {% else %}
+                            <span class="badge">{{ t(request, "crew_reports.closed") }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>{{ t(request, "crew_reports.no_records") }}</p>
+    {% endif %}
+</div>
+{% endblock %}

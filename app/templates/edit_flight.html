@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Uçuş Düzenle - Flight Management{% endblock %}
+
+{% block extra_head %}
+<style>
+    .form-card {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+    }
+
+    .field label {
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+    }
+
+    .field input {
+        padding: 0.8rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h2>Uçuş Düzenle</h2>
+
+    <form method="post" action="/admin-ui/flights/{{ flight.id }}/edit">
+        <div class="field">
+            <label for="flight_no">Flight No</label>
+            <input id="flight_no" name="flight_no" type="text" value="{{ flight.flight_no }}" required />
+        </div>
+
+        <div class="field">
+            <label for="flight_date">Flight Date</label>
+            <input id="flight_date" name="flight_date" type="date" value="{{ flight.flight_date }}" required />
+        </div>
+
+        <div class="field">
+            <label for="departure_airport">Departure Airport</label>
+            <input id="departure_airport" name="departure_airport" type="text" value="{{ flight.departure_airport }}" required />
+        </div>
+
+        <div class="field">
+            <label for="arrival_airport">Arrival Airport</label>
+            <input id="arrival_airport" name="arrival_airport" type="text" value="{{ flight.arrival_airport }}" required />
+        </div>
+
+        <div class="field">
+            <label for="sched_dep">Scheduled Departure</label>
+            <input id="sched_dep" name="sched_dep" type="datetime-local" value="{{ flight.sched_dep.strftime('%Y-%m-%dT%H:%M') }}" required />
+        </div>
+
+        <div class="field">
+            <label for="sched_arr">Scheduled Arrival</label>
+            <input id="sched_arr" name="sched_arr" type="datetime-local" value="{{ flight.sched_arr.strftime('%Y-%m-%dT%H:%M') }}" required />
+        </div>
+
+        <div class="field">
+            <label for="actual_dep">Actual Departure</label>
+            <input id="actual_dep" name="actual_dep" type="datetime-local" value="{{ flight.actual_dep.strftime('%Y-%m-%dT%H:%M') if flight.actual_dep else '' }}" />
+        </div>
+
+        <div class="field">
+            <label for="actual_arr">Actual Arrival</label>
+            <input id="actual_arr" name="actual_arr" type="datetime-local" value="{{ flight.actual_arr.strftime('%Y-%m-%dT%H:%M') if flight.actual_arr else '' }}" />
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn-primary">Kaydet</button>
+            <a href="/admin-ui" class="btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

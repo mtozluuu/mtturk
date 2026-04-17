@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance - Flight Management{% endblock %}
+
+{% block extra_head %}
+<style>
+    .section-title {
+        margin-bottom: 1rem;
+    }
+
+    .flight-meta p {
+        margin: 0.35rem 0;
+    }
+
+    .maintenance-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .maintenance-form label {
+        font-weight: 600;
+    }
+
+    .maintenance-form textarea {
+        min-height: 130px;
+        padding: 0.9rem;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        resize: vertical;
+        font: inherit;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .logs-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+    }
+
+    .log-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 1rem;
+        background: #f9fafb;
+    }
+
+    .log-meta {
+        color: #6b7280;
+        font-size: 0.92rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-box {
+        background: #eef6ff;
+        border: 1px solid #b6dbff;
+        color: #1f4b7a;
+        padding: 1rem;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="section-title">Maintenance</h2>
+
+    <div class="flight-meta">
+        <p><strong>Flight:</strong> {{ flight.flight_no }}</p>
+        <p><strong>Date:</strong> {{ flight.flight_date }}</p>
+        <p><strong>Route:</strong> {{ flight.departure_airport }} → {{ flight.arrival_airport }}</p>
+    </div>
+</div>
+
+<div class="card">
+    <h3 class="section-title">Yeni Bakım Kaydı</h3>
+
+    <form method="post" action="/flights-ui/{{ flight.id }}/maintenance" class="maintenance-form">
+        <label for="description">Açıklama</label>
+        <textarea id="description" name="description" placeholder="Bakım detaylarını yazın..." required></textarea>
+
+        <div class="actions">
+            <button type="submit" class="btn-primary">Kaydet</button>
+            <a href="/flights-ui" class="btn-secondary">Geri Dön</a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 class="section-title">Bakım Kayıtları</h3>
+
+    {% if logs and logs|length > 0 %}
+    <div class="logs-list">
+        {% for log in logs %}
+        <div class="log-item">
+            <div class="log-meta">
+                {% if log.user %}
+                    {{ log.user.username }}
+                {% else %}
+                    User #{{ log.user_id }}
+                {% endif %}
+                • {{ log.logged_at }}
+            </div>
+            <div>{{ log.description }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-box">
+        Bu uçuş için henüz bakım kaydı bulunmuyor.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

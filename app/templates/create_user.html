@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Yeni Kullanıcı Ekle - Flight Management{% endblock %}
+
+{% block extra_head %}
+<style>
+    .form-card {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+    }
+
+    .field label {
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+    }
+
+    .field input,
+    .field select {
+        padding: 0.8rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <h2>Yeni Kullanıcı Ekle</h2>
+
+    <form method="post" action="/admin-ui/users/new">
+        <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" required />
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required />
+        </div>
+
+        <div class="field">
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
+                <option value="pilot">pilot</option>
+                <option value="copilot">copilot</option>
+                <option value="technician">technician</option>
+                <option value="admin">admin</option>
+            </select>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn-primary">Kullanıcıyı Oluştur</button>
+            <a href="/admin-ui" class="btn-secondary">İptal</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

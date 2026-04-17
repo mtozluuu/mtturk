@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Uçuş Detay - Flight Management{% endblock %}
+{% block main_class %}page flight-detail-page{% endblock %}
+
+{% block extra_head %}
+<style>
+body {
+    background:
+        linear-gradient(rgba(2,6,23,0.42), rgba(2,6,23,0.42)),
+        url("/static/images/wolf.png") no-repeat center center / cover;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+.page.flight-detail-page {
+    min-height: calc(100vh - 88px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1rem 3rem 1rem;
+}
+.flight-detail-card {
+    background: rgba(20, 26, 38, 0.39);
+    border-radius: 30px;
+    padding: 2.8rem 2.4rem 2.2rem 2.4rem;
+    box-shadow: 0 18px 56px rgba(20,32,50,0.22);
+    max-width: 560px;
+    width: 100%;
+    color: #fff;
+    border: 1px solid rgba(107, 206, 254, 0.13);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    animation: fadein 0.8s cubic-bezier(.64,.09,.08,1);
+}
+@keyframes fadein {
+    0% { opacity: 0; transform: translateY(32px);}
+    100% { opacity: 1; transform: none;}
+}
+.flight-header-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.7rem;
+    margin-bottom: 1.10rem;
+}
+.flight-no-big {
+    font-size: 2.1rem; font-weight: 800; letter-spacing: 0.01em;
+}
+.flight-badge-status {
+    padding: 0.32em 1.08em; border-radius: 999px; font-size: 1.05rem;
+    background: linear-gradient(90deg, #36d399 44%, #38bdf8 100%);
+    color: #222b38; font-weight: 900; margin-right: 0.3em;
+    border: none; letter-spacing: 0.04em;
+}
+.flight-badge-status.completed {
+    background: linear-gradient(90deg,#818cf8 44%,#a7f3d0 100%);
+    color: #232b41;
+}
+.flight-badge-status.cancelled {
+    background: linear-gradient(90deg, #f87171 44%, #fde68a 100%);
+    color: #232b41;
+}
+.flight-date {
+    font-size: 1.08em;
+    padding: 0.25em 1em;
+    background: rgba(96,165,250,0.11);
+    color: #d5eaff;
+    border-radius: 999px;
+    font-weight: 700;
+    margin-left: 0.2em;
+}
+
+.flight-segments-row {
+    display: flex; align-items: center; justify-content: center; gap: 1.18rem;
+    margin-bottom: 1.15rem;
+}
+.flight-segment {
+    display: flex; flex-direction: column; align-items: center;
+}
+.flight-segment-label {
+    font-size: 0.98em; letter-spacing:0.03em; color: #bae6fd;
+}
+.flight-segment-airport {
+    font-size: 1.48em; font-weight: 800; color: #fff; letter-spacing: 0.07em;
+}
+.flight-arrow {
+    font-size: 2.1em; color: #38bdf8;
+}
+
+.flight-crew-row {
+    display: flex; align-items: center; gap: 1em; margin: 1.1em 0 1.1em 0;
+}
+.crew-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: #1e293b;
+    object-fit: cover;
+    border: 2px solid #60a5fa;
+}
+.crew-list {
+    display: flex; align-items: center; gap: 0.45em;
+}
+.crew-role { font-size:0.89em; color:#bae6fd; margin-right:0.5em; }
+.crew-name { font-weight:700;}
+
+.flight-detail-list {
+    margin: 1rem 0;
+    padding: 0; list-style: none;
+}
+.flight-detail-list li {
+    margin-bottom: 0.54em; font-size: 1.06em;
+    color: #e0e7ef;
+}
+
+.flight-detail-actions {
+    display: flex; gap: 1rem; justify-content: flex-end; margin-top:2.3rem;
+}
+.card-btn {
+    padding: 0.78rem 1.34rem;
+    border-radius: 999px;
+    border: none;
+    font-weight: 700;
+    font-size: 1.01rem;
+    letter-spacing: 0.09em;
+    background: rgba(255,255,255,0.10);
+    color: #46b4ee;
+    box-shadow: 0 6px 20px rgba(59,130,246,0.16);
+    cursor: pointer;
+    transition: all 0.15s;
+    backdrop-filter: blur(8px);
+}
+.card-btn:hover {
+    background: #2563eb;
+    color: #fff;
+    transform:translateY(-2px) scale(1.04);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flight-detail-card">
+    <div class="flight-header-row">
+        <div>
+            <span class="flight-no-big">TK202</span>
+            <span class="flight-date">16 Nis 2024</span>
+        </div>
+        <span class="flight-badge-status">Planlandı</span>
+    </div>
+
+    <div class="flight-segments-row">
+        <div class="flight-segment">
+            <span class="flight-segment-label">Kalkış</span>
+            <span class="flight-segment-airport">IST</span>
+        </div>
+        <span class="flight-arrow">→</span>
+        <div class="flight-segment">
+            <span class="flight-segment-label">Varış</span>
+            <span class="flight-segment-airport">AYT</span>
+        </div>
+    </div>
+
+    <ul class="flight-detail-list">
+        <li><strong>Sefer No:</strong> TK202</li>
+        <li><strong>Uçak:</strong> TC-JSU (Boeing 737-800)</li>
+        <li><strong>Kalkış Saati:</strong> 12:40</li>
+        <li><strong>Varış Saati:</strong> 14:17</li>
+        <li><strong>Durum:</strong> Planlandı</li>
+    </ul>
+
+    <div class="flight-crew-row">
+        <span class="crew-role">Kaptan:</span>
+        <span class="crew-list">
+            <img class="crew-avatar" src="/static/images/crew-1.jpg" alt="Captain" />
+            <span class="crew-name">Ahmet Yılmaz</span>
+        </span>
+        <span class="crew-role">Yardımcı:</span>
+        <span class="crew-list">
+            <img class="crew-avatar" src="/static/images/crew-2.jpg" alt="Co-pilot" />
+            <span class="crew-name">Elif Kara</span>
+        </span>
+    </div>
+
+    <div class="flight-detail-actions">
+        <button class="card-btn">Düzenle</button>
+        <button class="card-btn">İptal Et</button>
+        <button class="card-btn">Not Ekle</button>
+    </div>
+</div>
+{% endblock %}

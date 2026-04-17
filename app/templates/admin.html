@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Flight Management{% endblock %}
+
+{% block extra_head %}
+<style>
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .section-header h2,
+    .section-header h3 {
+        margin: 0;
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .inline-form {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin: 0;
+    }
+
+    .inline-form select {
+        padding: 0.5rem 0.65rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+    .danger-btn {
+        display: inline-block;
+        border: none;
+        border-radius: 8px;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        background: #dc2626;
+        color: white;
+    }
+
+    .danger-btn:hover {
+        background: #b91c1c;
+    }
+
+    .small-btn {
+        padding: 0.55rem 0.8rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .small-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .small-primary:hover {
+        background: #1d4ed8;
+    }
+
+    .small-secondary {
+        background: #e5e7eb;
+        color: #111827;
+    }
+
+    .small-secondary:hover {
+        background: #d1d5db;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="section-header">
+        <h2>Admin Panel</h2>
+    </div>
+    <p>Kullanıcıları ve uçuş kayıtlarını bu panel üzerinden yönetebilirsiniz.</p>
+</div>
+
+<div class="card">
+    <div class="section-header">
+        <h3>Kullanıcılar</h3>
+        <a href="/admin-ui/users/new" class="btn-primary">+ Yeni Kullanıcı</a>
+    </div>
+
+    {% if users and users|length > 0 %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Role Güncelle</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in users %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.username }}</td>
+                    <td>{{ item.role }}</td>
+                    <td>
+                        <form method="post" action="/admin-ui/users/{{ item.id }}/role" class="inline-form">
+                            <select name="role" required>
+                                <option value="pilot" {% if item.role == "pilot" %}selected{% endif %}>pilot</option>
+                                <option value="copilot" {% if item.role == "copilot" %}selected{% endif %}>copilot</option>
+                                <option value="technician" {% if item.role == "technician" %}selected{% endif %}>technician</option>
+                                <option value="admin" {% if item.role == "admin" %}selected{% endif %}>admin</option>
+                            </select>
+                            <button type="submit" class="small-btn small-primary">Güncelle</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Kayıtlı kullanıcı bulunmuyor.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="section-header">
+        <h3>Uçuşlar</h3>
+    </div>
+
+    {% if flights and flights|length > 0 %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Flight No</th>
+                    <th>Date</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in flights %}
+                <tr>
+                    <td>{{ flight.id }}</td>
+                    <td>{{ flight.flight_no }}</td>
+                    <td>{{ flight.flight_date }}</td>
+                    <td>{{ flight.departure_airport }}</td>
+                    <td>{{ flight.arrival_airport }}</td>
+                    <td>
+                        <div class="action-group">
+                            <a href="/admin-ui/flights/{{ flight.id }}/edit" class="small-btn small-secondary">Edit</a>
+                            <a href="/admin-ui/flights/{{ flight.id }}/crew" class="small-btn small-primary">Crew</a>
+                            <form method="post" action="/admin-ui/flights/{{ flight.id }}/delete" style="margin: 0;">
+                                <button type="submit" class="danger-btn">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>Kayıtlı uçuş bulunmuyor.</p>
+    {% endif %}
+</div>
+{% endblock %}

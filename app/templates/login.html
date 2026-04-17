@@ -1,26 +1,210 @@
 {% extends "base.html" %}
 
-{% block title %}Login – Flight Management{% endblock %}
+{% block title %}Login - Flight Management{% endblock %}
+{% block main_class %}page login-page{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background:
+            linear-gradient(rgba(2, 6, 23, 0.42), rgba(2, 6, 23, 0.42)),
+            url("/static/images/wolf.png") no-repeat center center / cover;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    .topbar {
+        background: transparent !important;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-bottom: none;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+
+    .nav a,
+    .brand,
+    .user-badge {
+        color: #ffffff !important;
+    }
+
+    .page.login-page {
+        max-width: 100%;
+        min-height: calc(100vh - 88px);
+        margin: 0;
+        padding: 2rem 1.5rem 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-shell {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 460px;
+        padding: 2rem;
+        border-radius: 24px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        color: white;
+    }
+
+    .login-card h2 {
+        margin: 0 0 0.75rem 0;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        text-align: center;
+    }
+
+    .login-card p {
+        margin: 0 0 1.5rem 0;
+        color: rgba(255, 255, 255, 0.78);
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+    }
+
+    .field label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .field input {
+        width: 100%;
+        padding: 0.95rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 14px;
+        font-size: 1rem;
+        color: white;
+        background: transparent;
+        outline: none;
+        transition: all 0.2s ease;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .field input::placeholder {
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    .field input:focus {
+        border-color: rgba(96, 165, 250, 0.72);
+        background: transparent;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+    }
+
+
+    .field input:-webkit-autofill,
+    .field input:-webkit-autofill:focus,
+    .field input:-webkit-autofill:hover,
+    .field input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+        box-shadow: 0 0 0 1000px transparent inset !important;
+        background-color: transparent !important;
+        -webkit-text-fill-color: #fff !important;
+        caret-color: #fff;
+        transition: background-color 9999s ease-in-out 0s;
+    }
+
+    .field input:-internal-autofill-selected {
+        background-color: transparent !important;
+        -webkit-text-fill-color: #fff !important;
+        caret-color: #fff;
+    }
+
+    .actions {
+        margin-top: 1.25rem;
+    }
+
+    .actions .btn-primary {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 16px;
+        padding: 0.95rem 1.2rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        background: transparent;
+        color: white;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        transition: all 0.2s ease;
+    }
+
+    .actions .btn-primary:hover {
+        background: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.24);
+        transform: translateY(-1px);
+    }
+
+    .hint {
+        margin-top: 1.2rem;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.66);
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .page.login-page {
+            padding: 1.25rem 1rem 2rem;
+        }
+
+        .login-card {
+            padding: 1.2rem;
+        }
+
+        .login-card h2 {
+            font-size: 1.7rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 420px; margin: 0 auto;">
-    <h2>Login</h2>
-    <div class="alert alert-info">
-        Use the API endpoint <code>POST /auth/login</code> to authenticate programmatically.
+<div class="login-shell">
+    <div class="login-card">
+        <h2>Giriş Yap</h2>
+        <p>Devam etmek için hesabınızla giriş yapın.</p>
+
+        <form method="post" action="/login">
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" placeholder="Kullanıcı adınızı girin" required />
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" placeholder="Şifrenizi girin" required />
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn-primary">Login</button>
+            </div>
+        </form>
+
+        <div class="hint">
+            Flight Management sistemine erişmek için oturum açın.
+        </div>
     </div>
-    <form method="post" action="/auth/login">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input id="username" name="username" type="text" placeholder="Enter your username" required />
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" placeholder="Enter your password" required />
-        </div>
-        <div class="btn-group">
-            <button class="btn btn-primary" type="submit">Sign In</button>
-            <a class="btn btn-secondary" href="/">Cancel</a>
-        </div>
-    </form>
 </div>
 {% endblock %}
