@@ -30,7 +30,7 @@ def regression_client(monkeypatch):
     )
 
     session = TestingSessionLocal()
-    now = datetime.utcnow()
+    now = datetime.now()
 
     admin = User(username="admin", password_hash="x", role="admin")
     pilot = User(username="pilot_1", password_hash="x", role="pilot")
