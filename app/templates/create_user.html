@@ -1,71 +1,135 @@
 {% extends "base.html" %}
 
 {% block title %}Yeni Kullanıcı Ekle - Flight Management{% endblock %}
+{% block main_class %}page user-create-page{% endblock %}
 
 {% block extra_head %}
 <style>
-    .form-card {
-        max-width: 700px;
-        margin: 0 auto;
-    }
-
-    .field {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 1rem;
-    }
-
-    .field label {
-        font-weight: 600;
-        margin-bottom: 0.4rem;
-    }
-
-    .field input,
-    .field select {
-        padding: 0.8rem;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 1rem;
-    }
-
-    .actions {
-        display: flex;
-        gap: 0.75rem;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-    }
+body {
+    background: linear-gradient(rgba(2,6,23,0.42),rgba(2,6,23,0.44)),
+        url("/static/images/wolf.png") no-repeat center center/cover;
+    min-height: 100vh; overflow-x: hidden;
+}
+.page.user-create-page {
+    min-height: calc(100vh - 88px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 2.5rem 0 2.8rem 0;
+}
+.user-create-card {
+    background: rgba(19, 31, 49, 0.41);
+    border-radius: 28px;
+    padding: 2.7rem 2.2rem 2.0rem 2.2rem;
+    max-width: 410px; width: 100%;
+    box-shadow: 0 24px 40px rgba(33,54,84,0.18);
+    border: 1px solid rgba(107, 206, 254, 0.14);
+    color: #eaf6fb;
+    backdrop-filter: blur(21px);
+    -webkit-backdrop-filter: blur(21px);
+    animation: fadeIn .7s cubic-bezier(.5,0,.18,1);
+    position: relative;
+}
+@keyframes fadeIn {
+    from {opacity:0; transform: translateY(26px);} to {opacity:1; transform:none;}
+}
+.user-create-title {
+    margin-bottom: 2.1rem;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.015em;
+    text-align: center;
+}
+.user-create-form label {
+    display: block; font-size: 1.08rem; font-weight: 500;
+    margin-bottom: 0.38rem; margin-top: 1.1rem; color: #bae6fd;
+}
+.user-create-form input, .user-create-form select {
+    width: 100%; font-size: 1.05rem; color: #bafcff;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(59,130,246,0.12);
+    border-radius: 999px;
+    outline: none; padding: 0.78rem 1.15rem;
+    margin-bottom: 0.01rem;
+    transition: border-color 0.14s, background 0.12s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.user-create-form input:focus,
+.user-create-form select:focus {
+    background: rgba(255,255,255,0.18);
+    border-color: #36d399;
+}
+.user-create-form .cam-btn {
+    background: linear-gradient(90deg, #2563eb 70%, #38bdf8 100%);
+    color: #fff;
+    border: none; border-radius: 999px; font-size: 1.11rem;
+    font-weight: 700;
+    padding: 1.05rem 1.7rem;
+    box-shadow: 0 4px 22px rgba(37,99,235,0.13);
+    margin-top: 2.2rem;
+    width: 100%;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+.user-create-form .cam-btn:hover {
+    background: linear-gradient(90deg, #1e40af 70%, #2563eb 100%);
+    transform: translateY(-2px) scale(1.03);
+}
+.form-error {
+    margin-bottom: 1.1rem;
+    background: rgba(239,68,68,0.13);
+    color: #ef4444;
+    border-radius: 12px;
+    padding: 0.7em 1.1em;
+    text-align: center;
+    font-weight: 600;
+}
+.form-success {
+    margin-bottom: 1.1rem;
+    background: rgba(16,185,129,0.13);
+    color: #36d399;
+    border-radius: 12px;
+    padding: 0.7em 1.1em;
+    text-align: center;
+    font-weight: 600;
+}
+@media (max-width: 600px) {
+    .user-create-card{padding: 1.2rem 0.3rem;}
+    .user-create-title {font-size: 1.13rem;}
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card form-card">
-    <h2>Yeni Kullanıcı Ekle</h2>
+<div class="user-create-card">
+    <div class="user-create-title">Yeni Kullanıcı Ekle</div>
 
-    <form method="post" action="/admin-ui/users/new">
-        <div class="field">
-            <label for="username">Username</label>
-            <input id="username" name="username" type="text" required />
-        </div>
+    {% if error %}
+        <div class="form-error">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+        <div class="form-success">{{ success }}</div>
+    {% endif %}
 
-        <div class="field">
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" required />
-        </div>
+    <form class="user-create-form" method="post" autocomplete="off">
+        <label for="username">Kullanıcı Adı</label>
+        <input id="username" name="username" type="text" minlength="3" maxlength="32" required placeholder="kullanici123" value="{{ username or '' }}">
 
-        <div class="field">
-            <label for="role">Role</label>
-            <select id="role" name="role" required>
-                <option value="pilot">pilot</option>
-                <option value="copilot">copilot</option>
-                <option value="technician">technician</option>
-                <option value="admin">admin</option>
-            </select>
-        </div>
+        <label for="password">Şifre</label>
+        <input id="password" name="password" type="password" minlength="8" maxlength="48" required placeholder="En az 8 karakter">
 
-        <div class="actions">
-            <button type="submit" class="btn-primary">Kullanıcıyı Oluştur</button>
-            <a href="/admin-ui" class="btn-secondary">İptal</a>
-        </div>
+        <label for="role">Rol</label>
+        <select id="role" name="role" required>
+            <option value="">Seçiniz</option>
+            <option value="admin" {% if role=='admin' %}selected{% endif %}>Admin</option>
+            <option value="pilot" {% if role=='pilot' %}selected{% endif %}>Pilot</option>
+            <option value="copilot" {% if role=='copilot' %}selected{% endif %}>Copilot</option>
+            <option value="technician" {% if role=='technician' %}selected{% endif %}>Teknisyen</option>
+        </select>
+        <button class="cam-btn" type="submit">
+            Kullanıcıyı Kaydet
+        </button>
     </form>
 </div>
 {% endblock %}

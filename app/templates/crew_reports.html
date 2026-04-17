@@ -1,279 +1,266 @@
 {% extends "base.html" %}
 
-{% block title %}{{ t(request, "crew_reports.title") }} - Flight Management{% endblock %}
+{% block title %}Ekip Raporları - Flight Management{% endblock %}
+{% block main_class %}page crew-reports-page{% endblock %}
 
 {% block extra_head %}
 <style>
-    .section-title {
-        margin-bottom: 1rem;
-    }
-
-    .subtle {
-        color: #6b7280;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
-    }
-
-    .stat-card {
-        background: #f8fafc;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 1.2rem;
-    }
-
-    .stat-card h3 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1rem;
-        color: #374151;
-    }
-
-    .stat-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #111827;
-    }
-
-    .filter-form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1rem;
-        align-items: end;
-    }
-
-    .field {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .field label {
-        font-weight: 600;
-        margin-bottom: 0.4rem;
-    }
-
-    .field input,
-    .field select {
-        padding: 0.75rem 0.85rem;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 0.95rem;
-    }
-
-    .actions {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        margin-top: 0.5rem;
-    }
-
-    .table-wrap {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .badge {
-        display: inline-block;
-        padding: 0.3rem 0.55rem;
-        border-radius: 999px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-    .badge-active {
-        background: #dcfce7;
-        color: #166534;
-    }
+body {
+  background: linear-gradient(rgba(2,6,23,0.44), rgba(2,6,23,0.42)),
+              url("/static/images/wolf.png") no-repeat center center/cover;
+  min-height: 100vh; overflow-x: hidden;
+}
+.page.crew-reports-page {
+  max-width: 1430px; margin: 0 auto;
+  padding: 2.8rem 1.5rem 4.4rem 1.5rem;
+}
+.crew-reports-title {
+  font-size: 2.05rem; font-weight: 900; color: #fff;
+  letter-spacing: -0.025em; margin-bottom: 1.4rem;
+  text-shadow: 0 6px 24px rgba(0,0,0,0.23);
+}
+.crew-reports-description {
+  color: #bae6fd; margin-bottom: 2.3rem;
+  font-size: 1.17rem; font-weight: 500;
+  max-width: 680px;
+}
+.crew-reports-summary-row {
+  display: flex; gap: 2em; flex-wrap: wrap;
+  margin-bottom: 2.5em;
+}
+.crew-reports-summary-card {
+  border-radius: 18px; background: rgba(24,41,60,0.239);
+  box-shadow: 0 3px 12px #2563eb16;
+  min-width:170px; padding:1.19em 1.6em;
+  display: flex; flex-direction: column; align-items: center;
+  color: #bae6fd; border: 1px solid #3b82f61f;backdrop-filter: blur(10px);
+}
+.crew-reports-summary-card .summary-value {
+  font-size: 2.1em; font-weight: 800; color: #fff;
+}
+.crew-reports-summary-card .summary-label {
+  font-size: 1em; text-align:center; margin-top:0.5em;
+}
+.crew-reports-form-block {
+  margin-bottom:2.2em; background: rgba(27,34,48,0.14);
+  border-radius: 17px; padding: 0.7em 1.5em 0.2em;
+  box-shadow: 0 2px 12px #2563eb10; border: 1px solid #3b82f611;
+  display:flex; flex-wrap: wrap; align-items: flex-end; gap:1.5em;
+}
+.crew-reports-form-block label {font-size:1.05em;font-weight:500;color:#bae6fd;display:block;margin-bottom:0.22em;}
+.crew-reports-form-block input,
+.crew-reports-form-block select {
+  border-radius: 999px; border: 1.5px solid #38bdf822;
+  font-size: 1.07em; background:rgba(255,255,255,0.089); color: #bafcff;
+  padding:0.58em 1.25em; min-width:126px;outline: none;
+  margin-bottom: 0.18em;transition: border-color 0.11s, background 0.12s;
+  backdrop-filter: blur(7px);
+}
+.crew-reports-form-block input:focus,
+.crew-reports-form-block select:focus {
+  background: rgba(255,255,255,0.19);
+  border-color: #36d399;
+}
+.crew-reports-form-block button {
+  border:none; border-radius: 999px;padding:0.75em 1.6em;font-weight:700;
+  font-size:1.13em; margin-left: 0.45em; margin-top: 1.36em;
+  background: linear-gradient(90deg,#2563eb 70%,#3b82f6 100%);
+  color: #fff; box-shadow:0 2px 10px #2563eb14; cursor:pointer;transition:.16s all;
+}
+.crew-reports-form-block button:hover {background:linear-gradient(90deg,#1e40af 77%,#2563eb 100%);transform:scale(1.03);}
+.crew-reports-form-block .export-btn {
+  background: linear-gradient(90deg, #16a34a 80%, #60a5fa 100%); margin-left:1.2em;color:#fff;
+}
+.crew-reports-form-block .export-btn:hover{background:linear-gradient(90deg,#047857 90%,#22d3ee 100%);}
+.crew-reports-filter-fields{display:flex;gap:1.3em;align-items:center;flex-wrap:wrap;}
+.crew-reports-form-block .clear-btn{
+  background: #334155;color:#bae6fd;box-shadow:none;margin-left:0.4em;
+}
+.crew-reports-tables-row{display:flex;gap:2.7em;flex-wrap:wrap;}
+.crew-reports-table-block{
+  background:rgba(31,46,69,0.13);border-radius:18px;padding:1.2em 0.9em 1.06em;min-width:250px;box-shadow:0 2px 12px #2563eb11;border:1px solid #3b82f615;
+  flex:1 1 0; max-width:675px; width:100%;
+  margin-bottom:2.2em;
+}
+.crew-reports-table-block-title{
+  color:#bae6fd;font-size:1.18em;font-weight:800;
+  text-align:center;
+  margin-bottom:0.9em;letter-spacing:0.012em;
+}
+.crew-reports-table{
+  width:100%;border-collapse:collapse;border-radius:9px;overflow:hidden;
+  margin-bottom:1.3em;
+  background:rgba(45,60,78,0.11);
+  box-shadow:0 2px 7px #2563eb14;border:1px solid #7bccf51b;
+}
+.crew-reports-table th, .crew-reports-table td{
+  padding:0.37em 0.49em;font-size:1.03em;
+}
+.crew-reports-table th{
+  background:rgba(59,130,246,0.13);color:#82ddf5;font-weight:700;text-align:left;border-bottom:2px solid #36d39944;white-space:nowrap;
+}
+.crew-reports-table td{
+  color:#dbf4ff;border-bottom:1px solid #276cad10;font-size:0.98em;
+}
+.crew-reports-table-row-empty td{
+  color:#74bada;text-align:center;font-size:1.04em;padding:1.2em 0;
+}
+.crew-reports-table .active-badge{
+  background: #36d399;color:#13315e;padding: 0.22em 0.62em;border-radius:999px;font-weight:700;font-size:0.9em;
+}
+.crew-reports-table .closed-badge{
+  background: #818cf8;color:#191c2f;padding: 0.22em 0.62em;border-radius:999px;font-weight:700;font-size:0.9em;
+}
+@media (max-width: 1100px){
+  .crew-reports-summary-row{gap:1em;}
+  .page.crew-reports-page{padding:0.7em;}
+  .crew-reports-tables-row{flex-direction:column;gap:0.8em;}
+  .crew-reports-table-block{max-width:100%;}
+}
+@media (max-width: 600px){
+  .crew-reports-title{font-size:1.10em;}
+  .crew-reports-table th,.crew-reports-table td{padding:0.22em 0.25em;}
+  .crew-reports-summary-card{padding:0.8em 0.8em;}
+}
 </style>
 {% endblock %}
 
 {% block content %}
-{% set total_seconds = summary_rows | sum(attribute='total_seconds') %}
-{% set total_minutes = summary_rows | sum(attribute='total_minutes') %}
-{% set total_assignments = summary_rows | sum(attribute='total_assignments') %}
-{% set total_users = summary_rows | length %}
-{% set unique_flights = detail_rows | map(attribute='flight_id') | unique | list | length %}
-{% set total_hours = total_seconds // 3600 %}
-{% set total_remaining_minutes = (total_seconds % 3600) // 60 %}
-{% set total_remaining_seconds = total_seconds % 60 %}
-
-<div class="card">
-    <h2 class="section-title">{{ t(request, "crew_reports.title") }}</h2>
-    <p class="subtle">
-        {{ t(request, "crew_reports.description") }}
-    </p>
+<div class="crew-reports-title">Ekip Raporları</div>
+<div class="crew-reports-description">
+    Pilot ve yardımcı pilot bazlı uçuş segmentlerini, toplam süreleri ve atama sayılarını görüntüleyin.
 </div>
 
-<div class="card">
-    <h3 class="section-title">{{ t(request, "crew_reports.summary_cards") }}</h3>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>{{ t(request, "crew_reports.total_crew_minutes") }}</h3>
-            <div class="stat-value">{{ total_minutes }}</div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "crew_reports.total_crew_time") }}</h3>
-            <div class="stat-value">
-                {{ "%02d:%02d:%02d"|format(total_hours, total_remaining_minutes, total_remaining_seconds) }}
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "crew_reports.total_assignments") }}</h3>
-            <div class="stat-value">{{ total_assignments }}</div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "crew_reports.total_unique_flights") }}</h3>
-            <div class="stat-value">{{ unique_flights }}</div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "crew_reports.total_crew_users") }}</h3>
-            <div class="stat-value">{{ total_users }}</div>
-        </div>
+<div class="crew-reports-summary-row">
+  <div class="crew-reports-summary-card">
+    <div class="summary-value">{{ summary_rows|length }}</div>
+    <div class="summary-label">Toplam Ekip</div>
+  </div>
+  <div class="crew-reports-summary-card">
+    <div class="summary-value">{{ detail_rows|length }}</div>
+    <div class="summary-label">Toplam Atama</div>
+  </div>
+  <div class="crew-reports-summary-card">
+    <div class="summary-value">
+      {{ summary_rows | sum(attribute='total_flights') }}
     </div>
-</div>
-
-<div class="card">
-    <h3 class="section-title">{{ t(request, "crew_reports.filters") }}</h3>
-
-    <form method="get" action="/reports-ui/crew" class="filter-form">
-        <div class="field">
-            <label for="start_date">{{ t(request, "crew_reports.start_date") }}</label>
-            <input type="date" id="start_date" name="start_date" value="{{ filters.start_date }}" />
-        </div>
-
-        <div class="field">
-            <label for="end_date">{{ t(request, "crew_reports.end_date") }}</label>
-            <input type="date" id="end_date" name="end_date" value="{{ filters.end_date }}" />
-        </div>
-
-        <div class="field">
-            <label for="user_id">{{ t(request, "crew_reports.personnel") }}</label>
-            <select id="user_id" name="user_id">
-                <option value="">{{ t(request, "crew_reports.all") }}</option>
-                {% for crew_user in crew_users %}
-                <option value="{{ crew_user.id }}" {% if filters.user_id == (crew_user.id|string) %}selected{% endif %}>
-                    {{ crew_user.username }} ({{ crew_user.role }})
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="field">
-            <label for="role">{{ t(request, "crew_reports.role") }}</label>
-            <select id="role" name="role">
-                <option value="">{{ t(request, "crew_reports.all") }}</option>
-                <option value="pilot" {% if filters.role == "pilot" %}selected{% endif %}>pilot</option>
-                <option value="copilot" {% if filters.role == "copilot" %}selected{% endif %}>copilot</option>
-            </select>
-        </div>
-
-        <div class="actions">
-            <button type="submit" class="btn-primary">{{ t(request, "crew_reports.filter") }}</button>
-            <a href="/reports-ui/crew" class="btn-secondary">{{ t(request, "crew_reports.clear") }}</a>
-            <a
-                href="/reports-ui/crew/export?start_date={{ filters.start_date }}&end_date={{ filters.end_date }}&user_id={{ filters.user_id }}&role={{ filters.role }}"
-                class="btn-primary"
-            >
-                {{ t(request, "crew_reports.export") }}
-            </a>
-        </div>
-    </form>
-</div>
-
-<div class="card">
-    <h3 class="section-title">{{ t(request, "crew_reports.summary") }}</h3>
-
-    {% if summary_rows and summary_rows|length > 0 %}
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>User ID</th>
-                    <th>Username</th>
-                    <th>{{ t(request, "crew_reports.role") }}</th>
-                    <th>{{ t(request, "crew_reports.total_flights_col") }}</th>
-                    <th>{{ t(request, "crew_reports.total_assignments") }}</th>
-                    <th>{{ t(request, "crew_reports.total_minutes") }}</th>
-                    <th>{{ t(request, "crew_reports.total_time_hms") }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in summary_rows %}
-                <tr>
-                    <td>{{ row.user_id }}</td>
-                    <td>{{ row.username }}</td>
-                    <td>{{ row.role }}</td>
-                    <td>{{ row.total_flights }}</td>
-                    <td>{{ row.total_assignments }}</td>
-                    <td>{{ row.total_minutes }}</td>
-                    <td>{{ row.total_hms }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="summary-label">Benzersiz Uçuş</div>
+  </div>
+  <div class="crew-reports-summary-card">
+    <div class="summary-value">
+      {% set total_seconds = summary_rows | sum(attribute='total_seconds') %}
+      {{ (total_seconds // 3600) }} sa {{ ((total_seconds % 3600) // 60) }} dk
     </div>
-    {% else %}
-    <p>{{ t(request, "crew_reports.no_records") }}</p>
-    {% endif %}
+    <div class="summary-label">Toplam Ekip Süresi</div>
+  </div>
 </div>
 
-<div class="card">
-    <h3 class="section-title">{{ t(request, "crew_reports.detail") }}</h3>
-
-    {% if detail_rows and detail_rows|length > 0 %}
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>{{ t(request, "crew_reports.flight_no") }}</th>
-                    <th>{{ t(request, "crew_reports.date") }}</th>
-                    <th>{{ t(request, "crew_reports.route") }}</th>
-                    <th>{{ t(request, "crew_reports.user") }}</th>
-                    <th>{{ t(request, "crew_reports.role") }}</th>
-                    <th>{{ t(request, "crew_reports.seat") }}</th>
-                    <th>{{ t(request, "crew_reports.start") }}</th>
-                    <th>{{ t(request, "crew_reports.end") }}</th>
-                    <th>{{ t(request, "crew_reports.duration_min") }}</th>
-                    <th>{{ t(request, "crew_reports.duration_hms") }}</th>
-                    <th>{{ t(request, "crew_reports.status") }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in detail_rows %}
-                <tr>
-                    <td>{{ row.flight_no }}</td>
-                    <td>{{ row.flight_date }}</td>
-                    <td>{{ row.departure_airport }} → {{ row.arrival_airport }}</td>
-                    <td>{{ row.username }}</td>
-                    <td>{{ row.role }}</td>
-                    <td>{{ row.seat }}</td>
-                    <td>{{ row.start_time }}</td>
-                    <td>{{ row.end_time or "-" }}</td>
-                    <td>{{ row.duration_minutes }}</td>
-                    <td>{{ row.duration_hms }}</td>
-                    <td>
-                        {% if row.is_active %}
-                            <span class="badge badge-active">{{ t(request, "crew_reports.active") }}</span>
-                        {% else %}
-                            <span class="badge">{{ t(request, "crew_reports.closed") }}</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<form class="crew-reports-form-block" method="get" action="">
+  <div class="crew-reports-filter-fields">
+    <div>
+      <label>Başlangıç</label>
+      <input type="date" name="start_date" value="{{filters.start_date}}">
     </div>
-    {% else %}
-    <p>{{ t(request, "crew_reports.no_records") }}</p>
-    {% endif %}
+    <div>
+      <label>Bitiş</label>
+      <input type="date" name="end_date" value="{{filters.end_date}}">
+    </div>
+    <div>
+      <label>Personel</label>
+      <select name="user_id">
+        <option value="">Tümü</option>
+        {% for u in crew_users %}
+          <option value="{{u.id}}" {% if filters.user_id|int == u.id %}selected{% endif %}>
+            {{u.username}}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Rol</label>
+      <select name="role">
+        <option value="">Tümü</option>
+        <option value="pilot" {% if filters.role=='pilot' %}selected{% endif %}>Pilot</option>
+        <option value="copilot" {% if filters.role=='copilot' %}selected{% endif %}>Copilot</option>
+      </select>
+    </div>
+  </div>
+  <button type="submit">Filtrele</button>
+  <a href="?clear=1" class="clear-btn" style="text-decoration:underline;padding:0.8em 1.1em;">Temizle</a>
+  <a href="/reports-ui/crew/export?start_date={{filters.start_date}}&end_date={{filters.end_date}}&user_id={{filters.user_id}}&role={{filters.role}}" class="export-btn" style="text-decoration:underline;padding:0.8em 1.3em;">Excel Aktar</a>
+</form>
+
+<div class="crew-reports-tables-row">
+  <div class="crew-reports-table-block">
+    <div class="crew-reports-table-block-title">Özet</div>
+    <table class="crew-reports-table">
+      <thead>
+        <tr>
+          <th>Kullanıcı</th>
+          <th>Rol</th>
+          <th>Toplam Uçuş</th>
+          <th>Toplam Atama</th>
+          <th>Toplam Dakika</th>
+          <th>Toplam Süre</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in summary_rows %}
+        <tr>
+          <td>{{ row.username }}</td>
+          <td>{{ row.role|capitalize }}</td>
+          <td>{{ row.total_flights }}</td>
+          <td>{{ row.total_assignments }}</td>
+          <td>{{ row.total_minutes }}</td>
+          <td>{{ row.total_hms }}</td>
+        </tr>
+        {% else %}
+        <tr class="crew-reports-table-row-empty"><td colspan="6">Kayıt yok.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="crew-reports-table-block">
+    <div class="crew-reports-table-block-title">Detay</div>
+    <table class="crew-reports-table">
+      <thead>
+        <tr>
+          <th>Tarih</th>
+          <th>Sefer No</th>
+          <th>Kalkış</th>
+          <th>Varış</th>
+          <th>Kullanıcı</th>
+          <th>Rol</th>
+          <th>Koltuk</th>
+          <th>Süre</th>
+          <th>Durum</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in detail_rows %}
+        <tr>
+          <td>{{ row.flight_date.strftime('%d %b %Y') }}</td>
+          <td>{{ row.flight_no }}</td>
+          <td>{{ row.departure_airport }}</td>
+          <td>{{ row.arrival_airport }}</td>
+          <td>{{ row.username }}</td>
+          <td>{{ row.role|capitalize }}</td>
+          <td>{{ row.seat|replace('_', ' ')|capitalize }}</td>
+          <td>{{ row.duration_hms }}</td>
+          <td>
+            {% if row.is_active %}
+              <span class="active-badge">Aktif</span>
+            {% else %}
+              <span class="closed-badge">Kapalı</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr class="crew-reports-table-row-empty"><td colspan="9">Kayıt yok.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}

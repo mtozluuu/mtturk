@@ -1,90 +1,167 @@
 {% extends "base.html" %}
 
 {% block title %}Yeni Uçuş Ekle - Flight Management{% endblock %}
+{% block main_class %}page create-flight-page{% endblock %}
 
 {% block extra_head %}
 <style>
-    .form-card {
-        max-width: 900px;
-        margin: 0 auto;
-    }
+body {
+    background:
+        linear-gradient(rgba(2,6,23,0.43), rgba(2,6,23,0.41)),
+        url("/static/images/wolf.png") no-repeat center center/cover;
+    min-height: 100vh; overflow-x: hidden;
+}
+.page.create-flight-page {
+    min-height: calc(100vh - 88px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 2.5rem 0 2.8rem 0;
+}
+.create-flight-card {
+    background: rgba(19, 31, 49, 0.41);
+    border-radius: 28px;
+    padding: 2.8rem 2.3rem 2rem 2.3rem;
+    max-width: 415px; width: 100%;
+    box-shadow: 0 24px 40px rgba(33,54,84,0.18);
+    border: 1px solid rgba(107, 206, 254, 0.14);
+    color: #eaf6fb;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    animation: fadeIn .7s cubic-bezier(.5,0,.15,1);
+    position: relative;
+}
+@keyframes fadeIn {
+    from {opacity:0; transform: translateY(26px);} to {opacity:1; transform:none;}
+}
+.create-flight-title {
+    margin-bottom: 2.1rem;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.015em;
+    text-align: center;
+}
+.create-flight-form label {
+    display: block; font-size: 1.09rem; font-weight: 500;
+    margin-bottom: 0.41rem; margin-top: 1.3rem; color: #bae6fd;
+}
+.create-flight-form input, .create-flight-form select {
+    width: 100%; font-size: 1.06rem; color: #bafcff;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(59,130,246,0.12);
+    border-radius: 999px;
+    outline: none; padding: 0.81rem 1.18rem;
+    margin-bottom: 0.06rem;
+    transition: border-color 0.14s, background 0.12s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.create-flight-form input:focus,
+.create-flight-form select:focus {
+    background: rgba(255,255,255,0.18);
+    border-color: #36d399;
+}
 
-    .field {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 1rem;
-    }
+.create-flight-form .form-row {
+    display: flex; gap: 1rem; align-items: center;
+    flex-wrap: wrap;
+}
+.create-flight-form .form-row > div { flex: 1 1 0; min-width: 120px;}
 
-    .field label {
-        font-weight: 600;
-        margin-bottom: 0.4rem;
-    }
+.create-flight-form .cam-btn {
+    background: linear-gradient(90deg, #2563eb 70%, #38bdf8 100%);
+    color: #fff;
+    border: none; border-radius: 999px; font-size: 1.13rem;
+    font-weight: 700;
+    padding: 1.05rem 1.85rem;
+    box-shadow: 0 4px 22px rgba(37,99,235,0.13);
+    margin-top: 2.5rem;
+    width: 100%;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+.create-flight-form .cam-btn:hover {
+    background: linear-gradient(90deg, #1e40af 70%, #2563eb 100%);
+    transform: translateY(-2px) scale(1.03);
+}
 
-    .field input {
-        padding: 0.8rem;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 1rem;
-    }
-
-    .actions {
-        display: flex;
-        gap: 0.75rem;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-    }
+.form-error {
+    margin-bottom: 1.1rem;
+    background: rgba(239,68,68,0.13);
+    color: #ef4444;
+    border-radius: 12px;
+    padding: 0.7em 1.1em;
+    text-align: center;
+    font-weight: 600;
+}
+.form-success {
+    margin-bottom: 1.1rem;
+    background: rgba(16,185,129,0.13);
+    color: #36d399;
+    border-radius: 12px;
+    padding: 0.7em 1.1em;
+    text-align: center;
+    font-weight: 600;
+}
+@media (max-width: 600px) {
+    .create-flight-card {padding: 1.2rem 0.2rem;}
+    .create-flight-title {font-size: 1.2rem;}
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card form-card">
-    <h2>Yeni Uçuş Ekle</h2>
+<div class="create-flight-card">
+    <div class="create-flight-title">Yeni Uçuş Ekle</div>
 
-    <form method="post" action="/flights-ui/new">
-        <div class="field">
-            <label for="flight_no">Flight No</label>
-            <input id="flight_no" name="flight_no" type="text" required />
+    {% if error %}
+        <div class="form-error">{{ error }}</div>
+    {% endif %}
+    {% if success %}
+        <div class="form-success">{{ success }}</div>
+    {% endif %}
+
+    <form class="create-flight-form" method="post" autocomplete="off">
+        <label for="flight_no">Uçuş Numarası</label>
+        <input id="flight_no" name="flight_no" type="text" maxlength="12" required placeholder="Örn: TK202" value="{{ flight_no or '' }}">
+
+        <label for="flight_date">Uçuş Tarihi</label>
+        <input id="flight_date" name="flight_date" type="date" required value="{{ flight_date or '' }}">
+
+        <div class="form-row">
+            <div>
+                <label for="departure_airport">Kalkış Havalimanı</label>
+                <input id="departure_airport" name="departure_airport" type="text" maxlength="4" required placeholder="Örn: IST" value="{{ departure_airport or '' }}">
+            </div>
+            <div>
+                <label for="arrival_airport">Varış Havalimanı</label>
+                <input id="arrival_airport" name="arrival_airport" type="text" maxlength="4" required placeholder="Örn: AYT" value="{{ arrival_airport or '' }}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label for="sched_dep">Planlanan Kalkış (saat)</label>
+                <input id="sched_dep" name="sched_dep" type="datetime-local" required value="{{ sched_dep or '' }}">
+            </div>
+            <div>
+                <label for="sched_arr">Planlanan Varış (saat)</label>
+                <input id="sched_arr" name="sched_arr" type="datetime-local" required value="{{ sched_arr or '' }}">
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label for="actual_dep">Gerçek Kalkış (opsiyonel)</label>
+                <input id="actual_dep" name="actual_dep" type="datetime-local" value="{{ actual_dep or '' }}">
+            </div>
+            <div>
+                <label for="actual_arr">Gerçek Varış (opsiyonel)</label>
+                <input id="actual_arr" name="actual_arr" type="datetime-local" value="{{ actual_arr or '' }}">
+            </div>
         </div>
 
-        <div class="field">
-            <label for="flight_date">Flight Date</label>
-            <input id="flight_date" name="flight_date" type="date" required />
-        </div>
-
-        <div class="field">
-            <label for="departure_airport">Departure Airport</label>
-            <input id="departure_airport" name="departure_airport" type="text" required />
-        </div>
-
-        <div class="field">
-            <label for="arrival_airport">Arrival Airport</label>
-            <input id="arrival_airport" name="arrival_airport" type="text" required />
-        </div>
-
-        <div class="field">
-            <label for="sched_dep">Scheduled Departure</label>
-            <input id="sched_dep" name="sched_dep" type="datetime-local" required />
-        </div>
-
-        <div class="field">
-            <label for="sched_arr">Scheduled Arrival</label>
-            <input id="sched_arr" name="sched_arr" type="datetime-local" required />
-        </div>
-
-        <div class="field">
-            <label for="actual_dep">Actual Departure</label>
-            <input id="actual_dep" name="actual_dep" type="datetime-local" />
-        </div>
-
-        <div class="field">
-            <label for="actual_arr">Actual Arrival</label>
-            <input id="actual_arr" name="actual_arr" type="datetime-local" />
-        </div>
-
-        <div class="actions">
-            <button type="submit" class="btn-primary">Kaydet</button>
-            <a href="/flights-ui" class="btn-secondary">İptal</a>
-        </div>
+        <button class="cam-btn" type="submit">
+            Uçuşu Kaydet
+        </button>
     </form>
 </div>
 {% endblock %}

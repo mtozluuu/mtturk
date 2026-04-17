@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ t(request, "crew_assignment.title") }} - Flight Management{% endblock %}
+{% block title %}{{ t("crew_assignment.title") }} - Flight Management{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -105,20 +105,20 @@
 
 {% block content %}
 <div class="card">
-    <h2 class="section-title">{{ t(request, "crew_assignment.title") }}</h2>
+    <h2 class="section-title">{{ t("crew_assignment.title") }}</h2>
 
     <div class="info-list">
-        <p><strong>{{ t(request, "crew_assignment.flight") }}:</strong> {{ flight.flight_no }}</p>
-        <p><strong>{{ t(request, "crew_assignment.date") }}:</strong> {{ flight.flight_date }}</p>
-        <p><strong>{{ t(request, "crew_assignment.route") }}:</strong> {{ flight.departure_airport }} → {{ flight.arrival_airport }}</p>
-        <p><strong>{{ t(request, "crew_assignment.scheduled") }}:</strong> {{ flight.sched_dep }} → {{ flight.sched_arr }}</p>
-        <p><strong>{{ t(request, "crew_assignment.actual") }}:</strong> {{ flight.actual_dep or "-" }} → {{ flight.actual_arr or "-" }}</p>
+        <p><strong>{{ t("crew_assignment.flight") }}:</strong> {{ flight.flight_no }}</p>
+        <p><strong>{{ t("crew_assignment.date") }}:</strong> {{ flight.flight_date }}</p>
+        <p><strong>{{ t("crew_assignment.route") }}:</strong> {{ flight.departure_airport }} → {{ flight.arrival_airport }}</p>
+        <p><strong>{{ t("crew_assignment.scheduled") }}:</strong> {{ flight.sched_dep }} → {{ flight.sched_arr }}</p>
+        <p><strong>{{ t("crew_assignment.actual") }}:</strong> {{ flight.actual_dep or "-" }} → {{ flight.actual_arr or "-" }}</p>
     </div>
 </div>
 
 <div class="two-col">
     <div class="card">
-        <h3 class="section-title">{{ t(request, "crew_assignment.active_crew") }}</h3>
+        <h3 class="section-title">{{ t("crew_assignment.active_crew") }}</h3>
 
         {% if active_assignments and active_assignments|length > 0 %}
         <div class="assignment-list">
@@ -141,17 +141,17 @@
         </div>
         {% else %}
         <div class="empty-box">
-            {{ t(request, "crew_assignment.no_active") }}
+            {{ t("crew_assignment.no_active") }}
         </div>
         {% endif %}
     </div>
 
     <div class="card">
-        <h3 class="section-title">{{ t(request, "crew_assignment.bulk_assign") }}</h3>
+        <h3 class="section-title">{{ t("crew_assignment.bulk_assign") }}</h3>
 
         <form method="post" action="/admin-ui/flights/{{ flight.id }}/crew" class="assign-form">
             <div class="field">
-                <label for="captain_user_id">{{ t(request, "crew_assignment.captain") }}</label>
+                <label for="captain_user_id">{{ t("crew_assignment.captain") }}</label>
                 <select id="captain_user_id" name="captain_user_id" required>
                     {% for crew_user in pilots %}
                     <option value="{{ crew_user.id }}">{{ crew_user.username }}</option>
@@ -160,7 +160,7 @@
             </div>
 
             <div class="field">
-                <label for="first_officer_user_id">{{ t(request, "crew_assignment.first_officer") }}</label>
+                <label for="first_officer_user_id">{{ t("crew_assignment.first_officer") }}</label>
                 <select id="first_officer_user_id" name="first_officer_user_id" required>
                     {% for crew_user in copilots %}
                     <option value="{{ crew_user.id }}">{{ crew_user.username }}</option>
@@ -169,18 +169,18 @@
             </div>
 
             <div class="actions">
-                <button type="submit" class="btn-primary">{{ t(request, "crew_assignment.bulk_assign_btn") }}</button>
+                <button type="submit" class="btn-primary">{{ t("crew_assignment.bulk_assign_btn") }}</button>
             </div>
         </form>
     </div>
 </div>
 
 <div class="card">
-    <h3 class="section-title">{{ t(request, "crew_assignment.handover") }}</h3>
+    <h3 class="section-title">{{ t("crew_assignment.handover") }}</h3>
 
     <form method="post" action="/admin-ui/flights/{{ flight.id }}/crew/change" class="assign-form">
         <div class="field">
-            <label for="seat">{{ t(request, "crew_reports.seat") }}</label>
+            <label for="seat">{{ t("crew_reports.seat") }}</label>
             <select id="seat" name="seat" required>
                 <option value="CAPTAIN">CAPTAIN</option>
                 <option value="FIRST_OFFICER">FIRST_OFFICER</option>
@@ -188,7 +188,7 @@
         </div>
 
         <div class="field">
-            <label for="new_user_id">{{ t(request, "crew_assignment.new_personnel") }}</label>
+            <label for="new_user_id">{{ t("crew_assignment.new_personnel") }}</label>
             <select id="new_user_id" name="new_user_id" required>
                 <optgroup label="Pilots">
                     {% for crew_user in pilots %}
@@ -204,28 +204,28 @@
         </div>
 
         <div class="actions">
-            <button type="submit" class="btn-primary">{{ t(request, "crew_assignment.save_change") }}</button>
-            <a href="/admin-ui" class="btn-secondary">{{ t(request, "crew_assignment.back") }}</a>
+            <button type="submit" class="btn-primary">{{ t("crew_assignment.save_change") }}</button>
+            <a href="/admin-ui" class="btn-secondary">{{ t("crew_assignment.back") }}</a>
         </div>
     </form>
 </div>
 
 <div class="card">
-    <h3 class="section-title">{{ t(request, "crew_assignment.history") }}</h3>
+    <h3 class="section-title">{{ t("crew_assignment.history") }}</h3>
 
     {% if assignment_history and assignment_history|length > 0 %}
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>{{ t(request, "crew_reports.user") }}</th>
-                    <th>{{ t(request, "crew_reports.role") }}</th>
-                    <th>{{ t(request, "crew_reports.seat") }}</th>
-                    <th>{{ t(request, "crew_reports.start") }}</th>
-                    <th>{{ t(request, "crew_reports.end") }}</th>
-                    <th>{{ t(request, "crew_assignment.duration_min") }}</th>
-                    <th>{{ t(request, "crew_assignment.duration_hms") }}</th>
-                    <th>{{ t(request, "crew_assignment.status") }}</th>
+                    <th>{{ t("crew_reports.user") }}</th>
+                    <th>{{ t("crew_reports.role") }}</th>
+                    <th>{{ t("crew_reports.seat") }}</th>
+                    <th>{{ t("crew_reports.start") }}</th>
+                    <th>{{ t("crew_reports.end") }}</th>
+                    <th>{{ t("crew_assignment.duration_min") }}</th>
+                    <th>{{ t("crew_assignment.duration_hms") }}</th>
+                    <th>{{ t("crew_assignment.status") }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -240,9 +240,9 @@
                     <td>{{ row.duration_hms }}</td>
                     <td>
                         {% if row.is_active %}
-                            <span class="badge badge-active">{{ t(request, "crew_assignment.active") }}</span>
+                            <span class="badge badge-active">{{ t("crew_assignment.active") }}</span>
                         {% else %}
-                            <span class="badge">{{ t(request, "crew_assignment.closed") }}</span>
+                            <span class="badge">{{ t("crew_assignment.closed") }}</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -252,7 +252,7 @@
     </div>
     {% else %}
     <div class="empty-box">
-        {{ t(request, "crew_assignment.no_history") }}
+        {{ t("crew_assignment.no_history") }}
     </div>
     {% endif %}
 </div>

@@ -1,158 +1,216 @@
 {% extends "base.html" %}
 
-{% block title %}{{ t(request, "reports.title") }} - Flight Management{% endblock %}
+{% block title %}Raporlar - Flight Management{% endblock %}
+{% block main_class %}page reports-page{% endblock %}
 
 {% block extra_head %}
 <style>
-    .section-title {
-        margin-bottom: 1rem;
-    }
+body {
+    background: linear-gradient(rgba(2, 6, 23, 0.44), rgba(2, 6, 23, 0.40)),
+                url("/static/images/wolf.png") no-repeat center center / cover;
+    min-height: 100vh; overflow-x: hidden;
+}
+.page.reports-page {
+    max-width: 1260px;
+    margin: 0 auto;
+    padding: 2.7rem 1rem 4rem 1rem;
+}
+.reports-title {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.025em;
+    margin-bottom: 1.8rem;
+    text-shadow: 0 8px 30px rgba(0,0,0,0.22);
+}
+.reports-description {
+    color: #bae6fd;
+    margin-bottom: 2.2rem;
+    font-size: 1.13rem;
+    font-weight: 500;
+    max-width: 610px;
+}
+.reports-extra-links {
+    margin-bottom: 2.1rem;
+}
+.reports-ekip-btn {
+    display:inline-block;
+    background:linear-gradient(90deg,#2563eb 70%,#38bdf8 100%);
+    color:#fff; font-weight:700; border-radius:999px;
+    padding:0.75em 1.7em; text-decoration:none; font-size:1.04em;
+    box-shadow:0 5px 18px rgba(37,99,235,0.14);
+    letter-spacing:0.015em;
+    transition:background 0.18s,box-shadow 0.18s;
+}
+.reports-ekip-btn:hover {
+    background:linear-gradient(90deg,#1e40af 70%,#2563eb 100%);
+    box-shadow:0 8px 24px rgba(37,99,235,0.18);
+}
 
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
-    }
-
-    .stat-card {
-        background: #f8fafc;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 1.2rem;
-    }
-
-    .stat-card h3 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1rem;
-        color: #374151;
-    }
-
-    .stat-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #111827;
-    }
-
-    .subtle {
-        color: #6b7280;
-    }
-
-    .action-row {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        margin-top: 1rem;
-    }
-
-    .table-wrap {
-        width: 100%;
-        overflow-x: auto;
-    }
+.reports-kpi-list {
+    display: flex;
+    gap: 2.2em;
+    flex-wrap: wrap;
+    margin-bottom: 2.9rem;
+}
+.reports-kpi-card {
+    background: rgba(24,41,60,0.245);
+    border-radius: 22px;
+    box-shadow: 0 3px 12px #2563eb18;
+    padding: 2.2em 2.3em 1.7em;
+    min-width: 166px;
+    color: #bae6fd;
+    border: 1px solid #93caf43a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1em;
+    backdrop-filter: blur(13px);
+    -webkit-backdrop-filter: blur(13px);
+}
+.reports-kpi-value {
+    font-size: 2.35em;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 0.2em;
+}
+.reports-kpi-label {
+    font-size: 1.01em;
+    font-weight: 600;
+    text-shadow: none;
+    color: #bae6fd;
+    opacity: 0.94;
+}
+.reports-section-title {
+    color: #bae6fd;
+    font-size: 1.13em;
+    font-weight: 800;
+    margin: 1.8em 0 0.7em 0;
+    letter-spacing: 0.01em;
+}
+.reports-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 2em;
+    background: rgba(45,60,78,0.17);
+    box-shadow: 0 2px 10px #2563eb15;
+    border: 1px solid #7bccf51b;
+}
+.reports-table th, .reports-table td {
+    padding: 0.57em 0.8em;
+    font-size: 1.03em;
+}
+.reports-table th {
+    background: rgba(59,130,246,0.12);
+    color: #82ddf5;
+    font-weight: 700;
+    text-align: left;
+    border-bottom: 2px solid #36d39944;
+    white-space: nowrap;
+}
+.reports-table td {
+    color: #dbf4ff;
+    border-bottom: 1px solid #276cad14;
+}
+.reports-table-row-empty td {
+    color: #74bada;
+    text-align: center;
+    font-size: 1.1em;
+    padding: 1.7em 0;
+}
+@media (max-width: 1100px){
+    .reports-kpi-list {gap: 1.1em;}
+    .page.reports-page{padding:0.4em;}
+}
+@media (max-width: 600px) {
+    .reports-title {font-size:1.18em;}
+    .reports-kpi-list{flex-direction:column;gap:0.7em;}
+    .reports-kpi-card{padding:1em 1em;}
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2 class="section-title">{{ t(request, "reports.title") }}</h2>
-    <p class="subtle">
-        {{ t(request, "reports.description") }}
-    </p>
+<div class="reports-title">Raporlar</div>
+<div class="reports-description">
+    Sistem genelindeki uçuş, kullanıcı ve aktif ekip istatistiklerini görüntüleyin.
+</div>
 
-    <div class="action-row">
-        <a href="/reports-ui/crew" class="btn-primary">{{ t(request, "reports.crew_reports") }}</a>
-        <a href="/flights-ui" class="btn-secondary">Flights</a>
-        {% if user and user.role == "admin" %}
-        <a href="/admin-ui" class="btn-secondary">Admin Panel</a>
-        {% endif %}
+<div class="reports-extra-links">
+    <a href="/reports-ui/crew" class="reports-ekip-btn">Ekip Raporları</a>
+</div>
+
+<div class="reports-kpi-list">
+    <div class="reports-kpi-card">
+        <div class="reports-kpi-value">{{ total_flights }}</div>
+        <div class="reports-kpi-label">Toplam Uçuş</div>
+    </div>
+    <div class="reports-kpi-card">
+        <div class="reports-kpi-value">{{ today_flights }}</div>
+        <div class="reports-kpi-label">Bugünkü Uçuşlar</div>
+    </div>
+    <div class="reports-kpi-card">
+        <div class="reports-kpi-value">{{ total_users }}</div>
+        <div class="reports-kpi-label">Kullanıcılar</div>
+    </div>
+    <div class="reports-kpi-card">
+        <div class="reports-kpi-value">{{ total_active_assignments }}</div>
+        <div class="reports-kpi-label">Aktif Ekip Atamaları</div>
     </div>
 </div>
 
-<div class="card">
-    <h3 class="section-title">{{ t(request, "reports.general_stats") }}</h3>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>{{ t(request, "reports.total_flights") }}</h3>
-            <div class="stat-value">{{ total_flights }}</div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "reports.today_flights") }}</h3>
-            <div class="stat-value">{{ today_flights }}</div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "reports.total_users") }}</h3>
-            <div class="stat-value">{{ total_users }}</div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "reports.active_assignments") }}</h3>
-            <div class="stat-value">{{ total_active_assignments }}</div>
-        </div>
+<div class="reports-kpi-list" style="margin-bottom:2.8rem;">
+    <div class="reports-kpi-card">
+        <div class="reports-kpi-value">{{ admin_count }}</div>
+        <div class="reports-kpi-label">Yönetici</div>
+    </div>
+    <div class="reports-kpi-card">
+        <div class="reports-kpi-value">{{ pilot_count }}</div>
+        <div class="reports-kpi-label">Pilot</div>
+    </div>
+    <div class="reports-kpi-card">
+        <div class="reports-kpi-value">{{ copilot_count }}</div>
+        <div class="reports-kpi-label">Copilot</div>
+    </div>
+    <div class="reports-kpi-card">
+        <div class="reports-kpi-value">{{ technician_count }}</div>
+        <div class="reports-kpi-label">Teknisyen</div>
     </div>
 </div>
 
-<div class="card">
-    <h3 class="section-title">{{ t(request, "reports.roles") }}</h3>
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>{{ t(request, "reports.admins") }}</h3>
-            <div class="stat-value">{{ admin_count }}</div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "reports.pilots") }}</h3>
-            <div class="stat-value">{{ pilot_count }}</div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "reports.copilots") }}</h3>
-            <div class="stat-value">{{ copilot_count }}</div>
-        </div>
-
-        <div class="stat-card">
-            <h3>{{ t(request, "reports.technicians") }}</h3>
-            <div class="stat-value">{{ technician_count }}</div>
-        </div>
-    </div>
-</div>
-
-<div class="card">
-    <h3 class="section-title">{{ t(request, "reports.recent_flights") }}</h3>
-
-    {% if recent_flights and recent_flights|length > 0 %}
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>{{ t(request, "crew_reports.flight_no") }}</th>
-                    <th>{{ t(request, "crew_reports.date") }}</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Scheduled Departure</th>
-                    <th>Scheduled Arrival</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for flight in recent_flights %}
-                <tr>
-                    <td>{{ flight.id }}</td>
-                    <td>{{ flight.flight_no }}</td>
-                    <td>{{ flight.flight_date }}</td>
-                    <td>{{ flight.departure_airport }}</td>
-                    <td>{{ flight.arrival_airport }}</td>
-                    <td>{{ flight.sched_dep }}</td>
-                    <td>{{ flight.sched_arr }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p>{{ t(request, "reports.no_flights") }}</p>
-    {% endif %}
-</div>
+<div class="reports-section-title">Son Uçuşlar</div>
+<table class="reports-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Sefer No</th>
+            <th>Tarih</th>
+            <th>Kalkış</th>
+            <th>Varış</th>
+            <th>Durum</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for f in recent_flights %}
+        <tr>
+            <td>{{ f.id }}</td>
+            <td>{{ f.flight_no }}</td>
+            <td>{{ f.flight_date.strftime('%d %b %Y') }}</td>
+            <td>{{ f.departure_airport }}</td>
+            <td>{{ f.arrival_airport }}</td>
+            <td>
+                {% if f.status %}
+                    {{ f.status }}
+                {% else %}
+                    Planlandı
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr class="reports-table-row-empty"><td colspan="6">Henüz kayıtlı uçuş bulunmuyor.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

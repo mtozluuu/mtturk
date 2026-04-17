@@ -244,41 +244,46 @@
         <a href="/" class="brand">✈ Flight Management</a>
 
         <nav class="nav">
-            <a href="/">{{ t(request, "nav.home") }}</a>
-            <a href="/flights-ui">{{ t(request, "nav.flights") }}</a>
+            <a href="/">{{ t("nav.home") }}</a>
+            <a href="/flights-ui">{{ t("nav.flights") }}</a>
 
             {% if current_user %}
-                <a href="/flights-ui/new">{{ t(request, "nav.new_flight") }}</a>
+                <a href="/flights-ui/new">{{ t("nav.new_flight") }}</a>
             {% endif %}
 
             {% if current_user and current_user.role == "admin" %}
-                <a href="/admin-ui">{{ t(request, "nav.admin") }}</a>
+                <a href="/admin-ui">{{ t("nav.admin") }}</a>
             {% endif %}
 
             {% if current_user %}
-                <a href="/reports-ui">{{ t(request, "nav.reports") }}</a>
+                <a href="/reports-ui">{{ t("nav.reports") }}</a>
             {% endif %}
 
-            <a href="/docs">{{ t(request, "nav.api_docs") }}</a>
+            {% if user %}
+                <a href="/change-password">{{ t("password.change") }}</a>
+            {% endif %}
+
+            <a href="/docs">{{ t("nav.api_docs") }}</a>
+            
         </nav>
 
         <div class="topbar-right">
             <form method="post" action="/set-language" class="lang-form">
                 <input type="hidden" name="next_url" value="{{ request.url.path }}" />
-                <label for="lang-select" class="lang-label">{{ t(request, "nav.language") }}:</label>
+                <label for="lang-select" class="lang-label">{{ t("nav.language") }}:</label>
                 <select id="lang-select" name="lang" class="lang-select" onchange="this.form.submit()">
-                    <option value="tr" {% if get_locale(request) == "tr" %}selected{% endif %}>{{ t(request, "lang.tr") }}</option>
-                    <option value="en" {% if get_locale(request) == "en" %}selected{% endif %}>{{ t(request, "lang.en") }}</option>
+                    <option value="tr" {% if get_locale(request) == "tr" %}selected{% endif %}>{{ t("lang.tr") }}</option>
+                    <option value="en" {% if get_locale(request) == "en" %}selected{% endif %}>{{ t("lang.en") }}</option>
                 </select>
             </form>
 
             {% if current_user %}
                 <span class="user-badge">{{ current_user.username }} ({{ current_user.role }})</span>
                 <form method="post" action="/logout" class="logout-form">
-                    <button type="submit" class="logout-btn">{{ t(request, "nav.logout") }}</button>
+                    <button type="submit" class="logout-btn">{{ t("nav.logout") }}</button>
                 </form>
             {% else %}
-                <a href="/login" class="btn-secondary">{{ t(request, "nav.login") }}</a>
+                <a href="/login" class="btn-secondary">{{ t("nav.login") }}</a>
             {% endif %}
         </div>
     </header>
@@ -288,49 +293,49 @@
         {% set success = request.query_params.get("success") %}
 
         {% if error == "1" %}
-            <div class="alert">{{ t(request, "msg.error.invalid_login") }}</div>
+            <div class="alert">{{ t("msg.error.invalid_login") }}</div>
         {% elif error == "invalid_role" %}
-            <div class="alert">{{ t(request, "msg.error.invalid_role") }}</div>
+            <div class="alert">{{ t("msg.error.invalid_role") }}</div>
         {% elif error == "user_not_found" %}
-            <div class="alert">{{ t(request, "msg.error.user_not_found") }}</div>
+            <div class="alert">{{ t("msg.error.user_not_found") }}</div>
         {% elif error == "flight_not_found" %}
-            <div class="alert">{{ t(request, "msg.error.flight_not_found") }}</div>
+            <div class="alert">{{ t("msg.error.flight_not_found") }}</div>
         {% elif error == "invalid_seat" %}
-            <div class="alert">{{ t(request, "msg.error.invalid_seat") }}</div>
+            <div class="alert">{{ t("msg.error.invalid_seat") }}</div>
         {% elif error == "role_mismatch" %}
-            <div class="alert">{{ t(request, "msg.error.role_mismatch") }}</div>
+            <div class="alert">{{ t("msg.error.role_mismatch") }}</div>
         {% elif error == "empty_description" %}
-            <div class="alert">{{ t(request, "msg.error.empty_description") }}</div>
+            <div class="alert">{{ t("msg.error.empty_description") }}</div>
         {% elif error == "username_exists" %}
-            <div class="alert">{{ t(request, "msg.error.username_exists") }}</div>
+            <div class="alert">{{ t("msg.error.username_exists") }}</div>
         {% elif error == "invalid_schedule_range" %}
-            <div class="alert">{{ t(request, "msg.error.invalid_schedule_range") }}</div>
+            <div class="alert">{{ t("msg.error.invalid_schedule_range") }}</div>
         {% elif error == "invalid_actual_departure" %}
-            <div class="alert">{{ t(request, "msg.error.invalid_actual_departure") }}</div>
+            <div class="alert">{{ t("msg.error.invalid_actual_departure") }}</div>
         {% elif error == "invalid_actual_arrival" %}
-            <div class="alert">{{ t(request, "msg.error.invalid_actual_arrival") }}</div>
+            <div class="alert">{{ t("msg.error.invalid_actual_arrival") }}</div>
         {% elif error == "invalid_actual_range" %}
-            <div class="alert">{{ t(request, "msg.error.invalid_actual_range") }}</div>
+            <div class="alert">{{ t("msg.error.invalid_actual_range") }}</div>
         {% endif %}
 
         {% if success == "login" %}
-            <div class="success">{{ t(request, "msg.success.login") }}</div>
+            <div class="success">{{ t("msg.success.login") }}</div>
         {% elif success == "logout" %}
-            <div class="success">{{ t(request, "msg.success.logout") }}</div>
+            <div class="success">{{ t("msg.success.logout") }}</div>
         {% elif success == "flight_created" %}
-            <div class="success">{{ t(request, "msg.success.flight_created") }}</div>
+            <div class="success">{{ t("msg.success.flight_created") }}</div>
         {% elif success == "flight_updated" %}
-            <div class="success">{{ t(request, "msg.success.flight_updated") }}</div>
+            <div class="success">{{ t("msg.success.flight_updated") }}</div>
         {% elif success == "flight_deleted" %}
-            <div class="success">{{ t(request, "msg.success.flight_deleted") }}</div>
+            <div class="success">{{ t("msg.success.flight_deleted") }}</div>
         {% elif success == "user_created" %}
-            <div class="success">{{ t(request, "msg.success.user_created") }}</div>
+            <div class="success">{{ t("msg.success.user_created") }}</div>
         {% elif success == "role_updated" %}
-            <div class="success">{{ t(request, "msg.success.role_updated") }}</div>
+            <div class="success">{{ t("msg.success.role_updated") }}</div>
         {% elif success == "crew_updated" %}
-            <div class="success">{{ t(request, "msg.success.crew_updated") }}</div>
+            <div class="success">{{ t("msg.success.crew_updated") }}</div>
         {% elif success == "maintenance_created" %}
-            <div class="success">{{ t(request, "msg.success.maintenance_created") }}</div>
+            <div class="success">{{ t("msg.success.maintenance_created") }}</div>
         {% endif %}
 
         {% block content %}{% endblock %}

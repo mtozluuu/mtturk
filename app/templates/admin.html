@@ -1,191 +1,180 @@
 {% extends "base.html" %}
 
 {% block title %}Admin Panel - Flight Management{% endblock %}
+{% block main_class %}page admin-page{% endblock %}
 
 {% block extra_head %}
 <style>
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-bottom: 1rem;
-    }
+body {
+    background:
+        linear-gradient(rgba(2,6,23,0.44), rgba(2,6,23,0.45)),
+        url("/static/images/wolf.png") no-repeat center center / cover;
+    min-height: 100vh; overflow-x: hidden;
+}
+.page.admin-page {max-width:1440px; margin:0 auto; padding:3rem 1.4rem 5rem;}
 
-    .section-header h2,
-    .section-header h3 {
-        margin: 0;
-    }
+.admin-header-row {
+    display:flex;align-items:center;justify-content:space-between;gap:1em;flex-wrap:wrap;margin-bottom:2.2rem;
+}
+.admin-title {font-size:2.3rem;font-weight:900;color:#fff;letter-spacing:-0.03em;text-shadow:0 8px 30px rgba(0,0,0,0.28);}
+.admin-welcome {color:#bae6fd;}
+.admin-new-user-btn {
+    background:linear-gradient(90deg,#2563eb 70%,#38bdf8 100%);
+    color:#fff;font-weight:700;font-size:1.07rem;border:none;border-radius:999px;padding:0.72rem 1.42rem;
+    cursor:pointer;transition:all 0.2s;box-shadow:0 6px 20px rgba(37,99,235,0.18);white-space:nowrap;
+}
+.admin-new-user-btn:hover {background:linear-gradient(90deg,#1e40af 70%,#2563eb 100%);transform:scale(1.03);}
 
-    .table-wrap {
-        width: 100%;
-        overflow-x: auto;
-    }
+.admin-summary-row {display:flex;gap:3em;flex-wrap:wrap;margin:2.3em 0 2.8em 0;}
+.admin-summary-card {
+    border-radius:22px;background:rgba(24,41,60,0.28);box-shadow:0 3px 12px #2563eb18;
+    min-width:140px;padding:1.35em 1.95em;display:flex;flex-direction:column;align-items:center;
+    color:#8ae0fe;text-shadow:none;border: 1px solid #3b82f622;backdrop-filter:blur(12px);
+}
+.admin-summary-card .admin-summary-value {font-size:2.2em; font-weight:800; color:#fff;}
+.admin-summary-card .admin-summary-label {font-size:1em;text-align:center;margin-top:0.5em;text-shadow:none;}
 
-    .inline-form {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin: 0;
-    }
+.admin-tables-row {display:flex;gap:2.5em;flex-wrap:wrap;}
+.admin-table-block {background:rgba(27,34,48,0.19);border-radius:18px;padding:1.9em 1.35em 1.7em;width:100%;max-width:650px;box-shadow:0 2px 12px #2563eb12;border: 1px solid #3b82f611; }
+.admin-table-block-title {font-size:1.24em;font-weight:700;color:#bae6fd;margin-bottom:1em;text-align:center;}
 
-    .inline-form select {
-        padding: 0.5rem 0.65rem;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 0.95rem;
-    }
+.admin-table {width:100%;border-collapse:collapse;margin-bottom:1.2em;}
+.admin-table th,.admin-table td {padding:0.49em 0.65em;font-size:1.02em;}
+.admin-table th {color:#82ddf5;font-weight:700;border-bottom:1.5px solid #36d39966;text-align:left;white-space:nowrap;}
+.admin-table td {color:#bde5ff;border-bottom:1px solid #276cad0d;}
+.admin-table td.actions {text-align:right;}
+.admin-table .user-role-badge {
+    display:inline-block;background:#38bdf8c2;color:#fff;padding:0.28em 0.89em;border-radius:999px;font-weight:700;font-size:0.92em;
+}
+.admin-table .user-role-badge.admin {background:#818cf8c7;}
+.admin-table .user-role-badge.pilot {background:#facc15c7;color:#0e2842;}
+.admin-table .user-role-badge.copilot {background:#fbbf24c7;color:#0e2842;}
+.admin-table .user-role-badge.technician {background:#34d399c7;color:#0e2842;}
+.admin-table .action-link {
+    display:inline-block;margin-left:0.4em;color:#3b82f6;text-decoration:underline;cursor:pointer;font-weight:600;transition:color .18s;font-size:1em;
+}
+.admin-table .action-link:hover {color:#818cf8;}
+.admin-table .action-btn {
+    background:none;border:none;padding:0;color:#ec4899;cursor:pointer;font-weight:700;font-size:1.08em;text-decoration:underline;margin-left:0.4em;
+    transition:color .18s;
+}
+.admin-table .action-btn:hover {color:#f87171;}
+.admin-table .edit-btn { color:#38bdf8;}
+.admin-table .edit-btn:hover {color:#2563eb;}
 
-    .danger-btn {
-        display: inline-block;
-        border: none;
-        border-radius: 8px;
-        padding: 0.65rem 0.85rem;
-        font-size: 0.9rem;
-        font-weight: 700;
-        cursor: pointer;
-        text-decoration: none;
-        background: #dc2626;
-        color: white;
-    }
-
-    .danger-btn:hover {
-        background: #b91c1c;
-    }
-
-    .small-btn {
-        padding: 0.55rem 0.8rem;
-        border-radius: 8px;
-        font-size: 0.88rem;
-        font-weight: 700;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        display: inline-block;
-    }
-
-    .small-primary {
-        background: #2563eb;
-        color: white;
-    }
-
-    .small-primary:hover {
-        background: #1d4ed8;
-    }
-
-    .small-secondary {
-        background: #e5e7eb;
-        color: #111827;
-    }
-
-    .small-secondary:hover {
-        background: #d1d5db;
-    }
-
-    .action-group {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
+.admin-table-row-empty {color:#74bada;text-align:center;font-size:1.12em;padding:1.5em 0;}
+@media (max-width:1100px){
+    .admin-tables-row {flex-direction:column;gap:1.2em;}
+    .admin-table-block {max-width:100%;}
+    .admin-summary-row {gap:1em;}
+}
+@media (max-width: 600px) {
+    .page.admin-page{padding:0.6em;}
+    .admin-header-row,.admin-summary-row{flex-direction:column;align-items:flex-start;gap:1em;}
+    .admin-tables-row {gap:0.3em;}
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="section-header">
-        <h2>Admin Panel</h2>
+<div class="admin-header-row">
+    <div>
+        <span class="admin-title">Admin Panel</span>
+        <span class="admin-welcome">Merhaba, {{ user.username }}!</span>
     </div>
-    <p>Kullanıcıları ve uçuş kayıtlarını bu panel üzerinden yönetebilirsiniz.</p>
+    <a href="/admin-ui/users/new" class="admin-new-user-btn">+ Yeni Kullanıcı</a>
 </div>
 
-<div class="card">
-    <div class="section-header">
-        <h3>Kullanıcılar</h3>
-        <a href="/admin-ui/users/new" class="btn-primary">+ Yeni Kullanıcı</a>
+<div class="admin-summary-row">
+    <div class="admin-summary-card">
+        <div class="admin-summary-value">{{ users|length }}</div>
+        <div class="admin-summary-label">Toplam Kullanıcı</div>
     </div>
+    <div class="admin-summary-card">
+        <div class="admin-summary-value">{{ flights|length }}</div>
+        <div class="admin-summary-label">Toplam Uçuş</div>
+    </div>
+    <div class="admin-summary-card">
+        <div class="admin-summary-value">
+            {% set piloto = users|selectattr("role", "equalto", "pilot")|list|length %}
+            {% set copiloto = users|selectattr("role", "equalto", "copilot")|list|length %}
+            {{ piloto }} / {{ copiloto }}
+        </div>
+        <div class="admin-summary-label">Pilot / Copilot</div>
+    </div>
+    <div class="admin-summary-card">
+        <div class="admin-summary-value">
+            {{ users|selectattr("role", "equalto", "technician")|list|length }}
+        </div>
+        <div class="admin-summary-label">Teknisyen</div>
+    </div>
+</div>
 
-    {% if users and users|length > 0 %}
-    <div class="table-wrap">
-        <table>
+<div class="admin-tables-row">
+    <div class="admin-table-block">
+        <div class="admin-table-block-title">Kullanıcılar</div>
+        <table class="admin-table">
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Username</th>
-                    <th>Role</th>
-                    <th>Role Güncelle</th>
+                    <th>Kullanıcı Adı</th>
+                    <th>Rol</th>
+                    <th class="actions"></th>
                 </tr>
             </thead>
             <tbody>
-                {% for item in users %}
+                {% for u in users %}
                 <tr>
-                    <td>{{ item.id }}</td>
-                    <td>{{ item.username }}</td>
-                    <td>{{ item.role }}</td>
+                    <td>{{ u.id }}</td>
+                    <td>{{ u.username }}</td>
                     <td>
-                        <form method="post" action="/admin-ui/users/{{ item.id }}/role" class="inline-form">
-                            <select name="role" required>
-                                <option value="pilot" {% if item.role == "pilot" %}selected{% endif %}>pilot</option>
-                                <option value="copilot" {% if item.role == "copilot" %}selected{% endif %}>copilot</option>
-                                <option value="technician" {% if item.role == "technician" %}selected{% endif %}>technician</option>
-                                <option value="admin" {% if item.role == "admin" %}selected{% endif %}>admin</option>
-                            </select>
-                            <button type="submit" class="small-btn small-primary">Güncelle</button>
+                        <span class="user-role-badge {{ u.role }}">{{ u.role|capitalize }}</span>
+                    </td>
+                    <td class="actions">
+                        <a class="action-link edit-btn" href="/admin-ui/users/{{u.id}}/role">Rol Değiştir</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="admin-table-row-empty">Hiç kullanıcı yok.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="admin-table-block">
+        <div class="admin-table-block-title">Uçuşlar</div>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Sefer No</th>
+                    <th>Tarih</th>
+                    <th>Kalkış</th>
+                    <th>Varış</th>
+                    <th class="actions"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in flights %}
+                <tr>
+                    <td>{{ f.id }}</td>
+                    <td>{{ f.flight_no }}</td>
+                    <td>{{ f.flight_date.strftime('%d %b %Y') }}</td>
+                    <td>{{ f.departure_airport }}</td>
+                    <td>{{ f.arrival_airport }}</td>
+                    <td class="actions">
+                        <a class="action-link edit-btn" href="/admin-ui/flights/{{f.id}}/edit">Düzenle</a>
+                        <form style="display:inline;" method="post" action="/admin-ui/flights/{{f.id}}/delete" onsubmit="return confirm('Silmek istediğine emin misin?');">
+                            <button type="submit" class="action-btn">Sil</button>
                         </form>
+                        <a class="action-link" href="/admin-ui/flights/{{f.id}}/crew">Ekip</a>
                     </td>
                 </tr>
+                {% else %}
+                <tr><td colspan="6" class="admin-table-row-empty">Hiç uçuş yok.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-    {% else %}
-    <p>Kayıtlı kullanıcı bulunmuyor.</p>
-    {% endif %}
-</div>
-
-<div class="card">
-    <div class="section-header">
-        <h3>Uçuşlar</h3>
-    </div>
-
-    {% if flights and flights|length > 0 %}
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Flight No</th>
-                    <th>Date</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for flight in flights %}
-                <tr>
-                    <td>{{ flight.id }}</td>
-                    <td>{{ flight.flight_no }}</td>
-                    <td>{{ flight.flight_date }}</td>
-                    <td>{{ flight.departure_airport }}</td>
-                    <td>{{ flight.arrival_airport }}</td>
-                    <td>
-                        <div class="action-group">
-                            <a href="/admin-ui/flights/{{ flight.id }}/edit" class="small-btn small-secondary">Edit</a>
-                            <a href="/admin-ui/flights/{{ flight.id }}/crew" class="small-btn small-primary">Crew</a>
-                            <form method="post" action="/admin-ui/flights/{{ flight.id }}/delete" style="margin: 0;">
-                                <button type="submit" class="danger-btn">Delete</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p>Kayıtlı uçuş bulunmuyor.</p>
-    {% endif %}
 </div>
 {% endblock %}

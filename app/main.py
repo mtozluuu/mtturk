@@ -293,6 +293,14 @@ def get_locale(request: Request) -> str:
         return "tr"
     return lang
 
+def i18n_ctx(request, extra=None):
+    lang = get_locale(request)
+    t = lambda k: TRANSLATIONS[lang].get(k, k)
+    ctx = {"t": t, "lang": lang, "request": request}
+    if extra:
+        ctx.update(extra)
+    return ctx
+
 
 def translate(request: Request, key: str) -> str:
     lang = get_locale(request)
@@ -442,7 +450,8 @@ app = FastAPI(title="Flight Management API", version="1.0.0", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory=os.path.join(_BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(_BASE_DIR, "templates"))
-templates.env.globals["t"] = translate
+
+
 templates.env.globals["get_locale"] = get_locale
 
 app.add_middleware(
@@ -462,13 +471,12 @@ app.include_router(reports.router)
 
 @app.get("/", include_in_schema=False)
 def index(request: Request):
-    return templates.TemplateResponse(request, "index.html", {})
-
+    user = get_session_user(request)
+    return templates.TemplateResponse(request, "index.html", i18n_ctx(request, {"user": user}))
 
 @app.get("/login", include_in_schema=False)
 def login_page(request: Request):
-    return templates.TemplateResponse(request, "login.html", {})
-
+    return templates.TemplateResponse(request, "login.html", i18n_ctx(request))
 
 @app.post("/set-language", include_in_schema=False)
 def set_language(
@@ -487,7 +495,6 @@ def set_language(
 
     return RedirectResponse(url=next_url, status_code=HTTP_303_SEE_OTHER)
 
-
 @app.post("/login", include_in_schema=False)
 def login_form(
     request: Request,
@@ -502,13 +509,11 @@ def login_form(
     request.session["user_id"] = user.id
     return RedirectResponse(url="/flights-ui?success=login", status_code=HTTP_303_SEE_OTHER)
 
-
 @app.post("/logout", include_in_schema=False)
 def logout(request: Request):
     if "session" in request.scope:
         request.session.clear()
     return RedirectResponse(url="/?success=logout", status_code=HTTP_303_SEE_OTHER)
-
 
 @app.get("/flights-ui", include_in_schema=False)
 def flights_ui(request: Request):
@@ -525,9 +530,8 @@ def flights_ui(request: Request):
     return templates.TemplateResponse(
         request,
         "flights.html",
-        {"flights": flight_list, "user": user},
+        i18n_ctx(request, {"flights": flight_list, "user": user}),
     )
-
 
 @app.get("/flights-ui/new", include_in_schema=False)
 def create_flight_page(request: Request):
@@ -535,8 +539,7 @@ def create_flight_page(request: Request):
     if user is None:
         return RedirectResponse(url="/login", status_code=HTTP_303_SEE_OTHER)
 
-    return templates.TemplateResponse(request, "create_flight.html", {"user": user})
-
+    return templates.TemplateResponse(request, "create_flight.html", i18n_ctx(request, {"user": user}))
 
 @app.post("/flights-ui/new", include_in_schema=False)
 def create_flight_from_form(
@@ -571,7 +574,6 @@ def create_flight_from_form(
 
     return RedirectResponse(url="/flights-ui?success=flight_created", status_code=HTTP_303_SEE_OTHER)
 
-
 @app.get("/flight-detail/{flight_id}", include_in_schema=False)
 def flight_detail(request: Request, flight_id: int):
     user = get_session_user(request)
@@ -583,7 +585,6 @@ def flight_detail(request: Request, flight_id: int):
         flight = db.query(Flight).filter(Flight.id == flight_id).first()
         if not flight:
             return RedirectResponse(url="/flights-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
-        # Örnek crew sorgusu (detay sayfasında göstereceksek)
         captain = db.query(User).join(CrewAssignment).filter(
             CrewAssignment.flight_id == flight_id,
             CrewAssignment.seat == "CAPTAIN"
@@ -598,19 +599,13 @@ def flight_detail(request: Request, flight_id: int):
     return templates.TemplateResponse(
         request,
         "flight_detail.html",
-        {
+        i18n_ctx(request, {
             "user": user,
             "flight": flight,
             "captain": captain,
             "copilot": copilot
-        },
+        }),
     )
-
-
-
-
-
-
 
 @app.get("/admin-ui", include_in_schema=False)
 def admin_ui(request: Request):
@@ -631,13 +626,12 @@ def admin_ui(request: Request):
     return templates.TemplateResponse(
         request,
         "admin.html",
-        {
+        i18n_ctx(request, {
             "user": user,
             "users": users,
             "flights": flights,
-        },
+        }),
     )
-
 
 @app.get("/admin-ui/users/new", include_in_schema=False)
 def create_user_page(request: Request):
@@ -651,9 +645,8 @@ def create_user_page(request: Request):
     return templates.TemplateResponse(
         request,
         "create_user.html",
-        {"user": user},
+        i18n_ctx(request, {"user": user}),
     )
-
 
 @app.post("/admin-ui/users/new", include_in_schema=False)
 def create_user_from_form(
@@ -690,6 +683,7 @@ def create_user_from_form(
     db.commit()
 
     return RedirectResponse(url="/admin-ui?success=user_created", status_code=HTTP_303_SEE_OTHER)
+
 
 
 @app.post("/admin-ui/users/{user_id}/role", include_in_schema=False)
@@ -1460,6 +1454,57 @@ def create_maintenance_log(
         url=f"/flights-ui/{flight_id}/maintenance?success=maintenance_created",
         status_code=HTTP_303_SEE_OTHER,
     )
+
+
+@app.get("/change-password")
+def change_password_page(request: Request):
+    user = get_session_user(request)
+    if user is None:
+        return RedirectResponse("/login", status_code=303)
+    return templates.TemplateResponse(
+        request,
+        "change_password.html",
+        i18n_ctx(request, {"user": user})
+    )
+
+@app.post("/change-password")
+def change_password(
+    request: Request,
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    confirm_password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = get_session_user(request)
+    lang = get_locale(request)
+    t = lambda k: TRANSLATIONS[lang].get(k, k)
+
+    if user is None:
+        return RedirectResponse("/login", status_code=303)
+
+    if not pwd_context.verify(current_password, user.password_hash):
+        return templates.TemplateResponse(
+            request,
+            "change_password.html",
+            i18n_ctx(request, {"user": user, "error": t("password.error.wrong")})
+        )
+    if new_password != confirm_password:
+        return templates.TemplateResponse(
+            request,
+            "change_password.html",
+            i18n_ctx(request, {"user": user, "error": t("password.error.mismatch")})
+        )
+    user.password_hash = pwd_context.hash(new_password)
+    db.add(user)
+    db.commit()
+    return templates.TemplateResponse(
+        request,
+        "change_password.html",
+        i18n_ctx(request, {"user": user, "success": t("password.success")})
+    )
+
+
+
 
 
 @app.get("/health")
