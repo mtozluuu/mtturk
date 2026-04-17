@@ -62,6 +62,14 @@ TRANSLATIONS = {
         "nav.language": "Language",
         "lang.tr": "Türkçe",
         "lang.en": "English",
+        "password.change": "Change Password",
+        "password.current": "Current Password",
+        "password.new": "New Password",
+        "password.confirm": "Confirm New Password",
+        "password.button": "Update Password",
+        "password.error.wrong": "Current password is incorrect.",
+        "password.error.mismatch": "New password and confirmation do not match.",
+        "password.success": "Password updated successfully.",
 
         "reports.title": "Reports",
         "reports.description": "View system-wide flight, user, and active crew statistics.",
@@ -186,6 +194,14 @@ TRANSLATIONS = {
         "nav.language": "Dil",
         "lang.tr": "Türkçe",
         "lang.en": "English",
+        "password.change": "Şifre Değiştir",
+        "password.current": "Mevcut Şifre",
+        "password.new": "Yeni Şifre",
+        "password.confirm": "Yeni Şifre Tekrar",
+        "password.button": "Şifreyi Güncelle",
+        "password.error.wrong": "Mevcut şifre yanlış.",
+        "password.error.mismatch": "Yeni şifre ve tekrar alanı eşleşmiyor.",
+        "password.success": "Şifre başarıyla güncellendi.",
 
         "reports.title": "Raporlar",
         "reports.description": "Sistem genelindeki uçuş, kullanıcı ve aktif ekip istatistiklerini görüntüleyin.",
@@ -336,14 +352,6 @@ def parse_optional_user_id_form_value(raw_value: str) -> int | None:
     if not value.isdigit():
         raise ValueError
     return int(value)
-
-
-app = FastAPI(title="Flight Management API", version="1.0.0", lifespan=lifespan)
-
-app.mount("/static", StaticFiles(directory=os.path.join(_BASE_DIR, "static")), name="static")
-templates = Jinja2Templates(directory=os.path.join(_BASE_DIR, "templates"))
-templates.env.globals["t"] = translate
-templates.env.globals["get_locale"] = get_locale
 
 
 def resolve_assignment_end_time(assignment: CrewAssignment, flight: Flight) -> datetime:
@@ -1055,18 +1063,21 @@ def reports_ui(request: Request):
     return templates.TemplateResponse(
         request,
         "reports.html",
-        {
-            "user": user,
-            "total_flights": total_flights,
-            "today_flights": today_flights,
-            "total_users": total_users,
-            "total_active_assignments": total_active_assignments,
-            "admin_count": admin_count,
-            "pilot_count": pilot_count,
-            "copilot_count": copilot_count,
-            "technician_count": technician_count,
-            "recent_flights": recent_flights,
-        },
+        i18n_ctx(
+            request,
+            {
+                "user": user,
+                "total_flights": total_flights,
+                "today_flights": today_flights,
+                "total_users": total_users,
+                "total_active_assignments": total_active_assignments,
+                "admin_count": admin_count,
+                "pilot_count": pilot_count,
+                "copilot_count": copilot_count,
+                "technician_count": technician_count,
+                "recent_flights": recent_flights,
+            },
+        ),
     )
 
 
@@ -1107,18 +1118,21 @@ def crew_reports_ui(
     return templates.TemplateResponse(
         request,
         "crew_reports.html",
-        {
-            "user": current_user,
-            "summary_rows": summary_rows,
-            "detail_rows": detail_rows,
-            "crew_users": crew_users,
-            "filters": {
-                "start_date": start_date,
-                "end_date": end_date,
-                "user_id": user_id,
-                "role": role,
+        i18n_ctx(
+            request,
+            {
+                "user": current_user,
+                "summary_rows": summary_rows,
+                "detail_rows": detail_rows,
+                "crew_users": crew_users,
+                "filters": {
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "user_id": user_id,
+                    "role": role,
+                },
             },
-        },
+        ),
     )
 
 
