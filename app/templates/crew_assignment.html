@@ -178,28 +178,24 @@
 <div class="card">
     <h3 class="section-title">{{ t("crew_assignment.handover") }}</h3>
 
-    <form method="post" action="/admin-ui/flights/{{ flight.id }}/crew/change" class="assign-form">
+    <form method="post" action="/admin-ui/flights/{{ flight.id }}/crew" class="assign-form">
         <div class="field">
-            <label for="seat">{{ t("crew_reports.seat") }}</label>
-            <select id="seat" name="seat" required>
-                <option value="CAPTAIN">CAPTAIN</option>
-                <option value="FIRST_OFFICER">FIRST_OFFICER</option>
+            <label for="handover_captain_user_id">{{ t("crew_assignment.captain") }}</label>
+            <select id="handover_captain_user_id" name="captain_user_id">
+                <option value=""></option>
+                {% for crew_user in pilots %}
+                <option value="{{ crew_user.id }}">{{ crew_user.username }}</option>
+                {% endfor %}
             </select>
         </div>
 
         <div class="field">
-            <label for="new_user_id">{{ t("crew_assignment.new_personnel") }}</label>
-            <select id="new_user_id" name="new_user_id" required>
-                <optgroup label="Pilots">
-                    {% for crew_user in pilots %}
-                    <option value="{{ crew_user.id }}">{{ crew_user.username }} (pilot)</option>
-                    {% endfor %}
-                </optgroup>
-                <optgroup label="Copilots">
-                    {% for crew_user in copilots %}
-                    <option value="{{ crew_user.id }}">{{ crew_user.username }} (copilot)</option>
-                    {% endfor %}
-                </optgroup>
+            <label for="handover_first_officer_user_id">{{ t("crew_assignment.first_officer") }}</label>
+            <select id="handover_first_officer_user_id" name="first_officer_user_id">
+                <option value=""></option>
+                {% for crew_user in copilots %}
+                <option value="{{ crew_user.id }}">{{ crew_user.username }}</option>
+                {% endfor %}
             </select>
         </div>
 

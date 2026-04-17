@@ -304,6 +304,12 @@
             <div class="alert">{{ t("msg.error.invalid_seat") }}</div>
         {% elif error == "role_mismatch" %}
             <div class="alert">{{ t("msg.error.role_mismatch") }}</div>
+        {% elif error == "missing_crew_selection" %}
+            <div class="alert">{{ t("msg.error.missing_crew_selection") }}</div>
+        {% elif error == "same_personnel" %}
+            <div class="alert">{{ t("msg.error.same_personnel") }}</div>
+        {% elif error == "inactive_flight" %}
+            <div class="alert">{{ t("msg.error.inactive_flight") }}</div>
         {% elif error == "empty_description" %}
             <div class="alert">{{ t("msg.error.empty_description") }}</div>
         {% elif error == "username_exists" %}
