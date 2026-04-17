@@ -1,0 +1,24 @@
+Requesting changes before merge.
+
+Please address the following:
+
+1. `flight_notes` database safety
+   - Adding the model plus `scripts/init_db.sql` is not enough for an already-existing database.
+   - Please make sure this feature does not break environments where the app is already initialized and the new table does not yet exist.
+   - Add the necessary migration/compatibility handling or another safe approach.
+
+2. End-to-end validation
+   - Please verify and confirm these flows work:
+     - flights -> detail
+     - mark departure
+     - mark arrival
+     - add flight note
+     - update captain / first officer
+     - same-person double-seat prevention
+
+3. Crew update behavior
+   - The new detail-page crew update currently requires both seat selections on each submit.
+   - Please confirm that this is intentional, or revise it so partial updates are supported if needed.
+
+4. UI feedback validation
+   - Please confirm the newly added success/error messages render properly through `base.html`.
