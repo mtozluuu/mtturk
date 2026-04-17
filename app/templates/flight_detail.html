@@ -263,7 +263,7 @@ body {
 </div>
 
 <div class="glass-card">
-    <h3 class="section-title">{{ t("flight_detail.title") }}</h3>
+    <h3 class="section-title">{{ t("flight_detail.quick_actions") }}</h3>
     <div class="quick-actions">
         <form method="post" action="/flight-detail/{{ flight.id }}/mark-departure">
             <button type="submit" class="btn-secondary" {% if flight.actual_dep %}disabled{% endif %}>{{ t("flight_detail.mark_departure_now") }}</button>

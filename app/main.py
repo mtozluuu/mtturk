@@ -174,6 +174,7 @@ TRANSLATIONS = {
         "flight_detail.not_set": "Not set",
         "flight_detail.mark_departure_now": "Mark Departure Now",
         "flight_detail.mark_arrival_now": "Mark Arrival Now",
+        "flight_detail.quick_actions": "Operational Actions",
         "flight_detail.crew": "Active Crew",
         "flight_detail.current_captain": "Current Captain",
         "flight_detail.current_first_officer": "Current First Officer",
@@ -340,6 +341,7 @@ TRANSLATIONS = {
         "flight_detail.not_set": "İşaretlenmedi",
         "flight_detail.mark_departure_now": "Kalkışı Şimdi İşaretle",
         "flight_detail.mark_arrival_now": "Varışı Şimdi İşaretle",
+        "flight_detail.quick_actions": "Operasyon Aksiyonları",
         "flight_detail.crew": "Aktif Ekip",
         "flight_detail.current_captain": "Mevcut Kaptan",
         "flight_detail.current_first_officer": "Mevcut Yardımcı Pilot",
@@ -438,6 +440,10 @@ def assignment_duration_seconds(assignment: CrewAssignment, flight: Flight) -> i
 
 def assignment_duration_minutes(assignment: CrewAssignment, flight: Flight) -> int:
     return assignment_duration_seconds(assignment, flight) // 60
+
+
+def normalized_assignment_end_time(start_time: datetime, proposed_end_time: datetime) -> datetime:
+    return proposed_end_time if proposed_end_time >= start_time else start_time
 
 
 def format_duration_hms(total_seconds: int) -> str:
@@ -765,7 +771,7 @@ def mark_flight_departure_now(
         )
 
     now = datetime.utcnow()
-    if flight.actual_arr is not None and now > flight.actual_arr:
+    if flight.actual_arr is not None and now >= flight.actual_arr:
         return RedirectResponse(
             url=f"/flight-detail/{flight_id}?error=arrival_before_departure",
             status_code=HTTP_303_SEE_OTHER,
@@ -801,7 +807,7 @@ def mark_flight_arrival_now(
         )
 
     now = datetime.utcnow()
-    if flight.actual_dep is not None and now < flight.actual_dep:
+    if flight.actual_dep is not None and now <= flight.actual_dep:
         return RedirectResponse(
             url=f"/flight-detail/{flight_id}?error=arrival_before_departure",
             status_code=HTTP_303_SEE_OTHER,
@@ -817,8 +823,7 @@ def mark_flight_arrival_now(
         .all()
     )
     for assignment in open_assignments:
-        if now >= assignment.start_time:
-            assignment.end_time = now
+        assignment.end_time = normalized_assignment_end_time(assignment.start_time, now)
 
     db.commit()
 
@@ -1817,8 +1822,10 @@ def edit_flight_from_form(
         )
 
         for assignment in open_assignments:
-            if parsed_actual_arr >= assignment.start_time:
-                assignment.end_time = parsed_actual_arr
+            assignment.end_time = normalized_assignment_end_time(
+                assignment.start_time,
+                parsed_actual_arr,
+            )
 
     db.commit()
 
