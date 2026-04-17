@@ -95,8 +95,23 @@
         color: #166534;
     }
 
+    .handover-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .compact-table th,
+    .compact-table td {
+        padding: 0.65rem 0.75rem;
+    }
+
     @media (max-width: 900px) {
         .two-col {
+            grid-template-columns: 1fr;
+        }
+
+        .handover-grid {
             grid-template-columns: 1fr;
         }
     }
@@ -179,28 +194,44 @@
     <h3 class="section-title">{{ t("crew_assignment.handover") }}</h3>
 
     <form method="post" action="/admin-ui/flights/{{ flight.id }}/crew/change" class="assign-form">
-        <div class="field">
-            <label for="seat">{{ t("crew_reports.seat") }}</label>
-            <select id="seat" name="seat" required>
-                <option value="CAPTAIN">CAPTAIN</option>
-                <option value="FIRST_OFFICER">FIRST_OFFICER</option>
-            </select>
-        </div>
+        <div class="handover-grid">
+            <div class="table-wrap">
+                <table class="compact-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t("crew_assignment.pilot_list") }}</th>
+                            <th>{{ t("crew_assignment.select_user") }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for crew_user in pilots %}
+                        <tr>
+                            <td>{{ crew_user.username }}</td>
+                            <td><input type="radio" name="captain_user_id" value="{{ crew_user.id }}" required></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-        <div class="field">
-            <label for="new_user_id">{{ t("crew_assignment.new_personnel") }}</label>
-            <select id="new_user_id" name="new_user_id" required>
-                <optgroup label="Pilots">
-                    {% for crew_user in pilots %}
-                    <option value="{{ crew_user.id }}">{{ crew_user.username }} (pilot)</option>
-                    {% endfor %}
-                </optgroup>
-                <optgroup label="Copilots">
-                    {% for crew_user in copilots %}
-                    <option value="{{ crew_user.id }}">{{ crew_user.username }} (copilot)</option>
-                    {% endfor %}
-                </optgroup>
-            </select>
+            <div class="table-wrap">
+                <table class="compact-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t("crew_assignment.copilot_list") }}</th>
+                            <th>{{ t("crew_assignment.select_user") }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for crew_user in copilots %}
+                        <tr>
+                            <td>{{ crew_user.username }}</td>
+                            <td><input type="radio" name="first_officer_user_id" value="{{ crew_user.id }}" required></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="actions">

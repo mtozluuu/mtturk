@@ -316,6 +316,10 @@
             <div class="alert">{{ t("msg.error.invalid_actual_arrival") }}</div>
         {% elif error == "invalid_actual_range" %}
             <div class="alert">{{ t("msg.error.invalid_actual_range") }}</div>
+        {% elif error == "missing_crew_selection" %}
+            <div class="alert">{{ t("msg.error.missing_crew_selection") }}</div>
+        {% elif error == "same_personnel" %}
+            <div class="alert">{{ t("msg.error.same_personnel") }}</div>
         {% endif %}
 
         {% if success == "login" %}

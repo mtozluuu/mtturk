@@ -46,6 +46,8 @@ TRANSLATIONS = {
         "msg.error.invalid_actual_departure": "Actual departure cannot be earlier than scheduled departure.",
         "msg.error.invalid_actual_arrival": "Actual arrival cannot be earlier than scheduled arrival.",
         "msg.error.invalid_actual_range": "Actual arrival cannot be earlier than actual departure.",
+        "msg.error.missing_crew_selection": "Pilot and copilot selections are required.",
+        "msg.error.same_personnel": "Pilot and copilot must be different users.",
 
         "msg.success.login": "Logged in successfully.",
         "msg.success.logout": "Logged out successfully.",
@@ -127,6 +129,9 @@ TRANSLATIONS = {
         "crew_assignment.handover": "Crew Change / Handover",
         "crew_assignment.new_personnel": "New Personnel",
         "crew_assignment.save_change": "Save Change",
+        "crew_assignment.pilot_list": "Pilot List",
+        "crew_assignment.copilot_list": "Copilot List",
+        "crew_assignment.select_user": "Select",
         "crew_assignment.back": "Back",
         "crew_assignment.history": "Assignment History",
         "crew_assignment.no_history": "There is no assignment history for this flight yet.",
@@ -158,6 +163,8 @@ TRANSLATIONS = {
         "msg.error.invalid_actual_departure": "Gerçek kalkış, planlanan kalkıştan önce olamaz.",
         "msg.error.invalid_actual_arrival": "Gerçek varış, planlanan varıştan önce olamaz.",
         "msg.error.invalid_actual_range": "Gerçek varış, gerçek kalkıştan önce olamaz.",
+        "msg.error.missing_crew_selection": "Pilot ve yardımcı pilot seçimi zorunludur.",
+        "msg.error.same_personnel": "Pilot ve yardımcı pilot farklı kişiler olmalıdır.",
 
         "msg.success.login": "Başarıyla giriş yapıldı.",
         "msg.success.logout": "Başarıyla çıkış yapıldı.",
@@ -240,6 +247,9 @@ TRANSLATIONS = {
         "crew_assignment.handover": "Ekip Değişimi / Devir",
         "crew_assignment.new_personnel": "Yeni Personel",
         "crew_assignment.save_change": "Değişikliği Kaydet",
+        "crew_assignment.pilot_list": "Pilot Listesi",
+        "crew_assignment.copilot_list": "Yardımcı Pilot Listesi",
+        "crew_assignment.select_user": "Seç",
         "crew_assignment.back": "Geri Dön",
         "crew_assignment.history": "Atama Geçmişi",
         "crew_assignment.no_history": "Bu uçuş için henüz atama geçmişi bulunmuyor.",
@@ -816,6 +826,12 @@ def assign_flight_crew(
             status_code=HTTP_303_SEE_OTHER,
         )
 
+    if captain_user_id == first_officer_user_id:
+        return RedirectResponse(
+            url=f"/admin-ui/flights/{flight_id}/crew?error=same_personnel",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
     if captain_user.role != "pilot" or first_officer_user.role != "copilot":
         return RedirectResponse(
             url=f"/admin-ui/flights/{flight_id}/crew?error=role_mismatch",
@@ -877,8 +893,8 @@ def assign_flight_crew(
 def change_flight_crew(
     flight_id: int,
     request: Request,
-    seat: str = Form(...),
-    new_user_id: int = Form(...),
+    captain_user_id: int | None = Form(None),
+    first_officer_user_id: int | None = Form(None),
     db: Session = Depends(get_db),
 ):
     current_user = get_session_user(request)
@@ -888,10 +904,9 @@ def change_flight_crew(
     if current_user.role != "admin":
         return RedirectResponse(url="/flights-ui", status_code=HTTP_303_SEE_OTHER)
 
-    seat = seat.strip().upper()
-    if seat not in {"CAPTAIN", "FIRST_OFFICER"}:
+    if captain_user_id is None or first_officer_user_id is None:
         return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=invalid_seat",
+            url=f"/admin-ui/flights/{flight_id}/crew?error=missing_crew_selection",
             status_code=HTTP_303_SEE_OTHER,
         )
 
@@ -899,25 +914,41 @@ def change_flight_crew(
     if flight is None:
         return RedirectResponse(url="/admin-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
 
-    new_user = db.query(User).filter(User.id == new_user_id).first()
-    if new_user is None:
+    if captain_user_id == first_officer_user_id:
+        return RedirectResponse(
+            url=f"/admin-ui/flights/{flight_id}/crew?error=same_personnel",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    captain_user = db.query(User).filter(User.id == captain_user_id).first()
+    first_officer_user = db.query(User).filter(User.id == first_officer_user_id).first()
+
+    if captain_user is None or first_officer_user is None:
         return RedirectResponse(
             url=f"/admin-ui/flights/{flight_id}/crew?error=user_not_found",
             status_code=HTTP_303_SEE_OTHER,
         )
 
-    required_role = "pilot" if seat == "CAPTAIN" else "copilot"
-    if new_user.role != required_role:
+    if captain_user.role != "pilot" or first_officer_user.role != "copilot":
         return RedirectResponse(
             url=f"/admin-ui/flights/{flight_id}/crew?error=role_mismatch",
             status_code=HTTP_303_SEE_OTHER,
         )
 
-    active_assignment = (
+    active_captain = (
         db.query(CrewAssignment)
         .filter(
             CrewAssignment.flight_id == flight_id,
-            CrewAssignment.seat == seat,
+            CrewAssignment.seat == "CAPTAIN",
+            CrewAssignment.end_time.is_(None),
+        )
+        .first()
+    )
+    active_first_officer = (
+        db.query(CrewAssignment)
+        .filter(
+            CrewAssignment.flight_id == flight_id,
+            CrewAssignment.seat == "FIRST_OFFICER",
             CrewAssignment.end_time.is_(None),
         )
         .first()
@@ -925,22 +956,28 @@ def change_flight_crew(
 
     now = datetime.utcnow()
 
-    if active_assignment and active_assignment.user_id == new_user_id:
-        return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?success=crew_updated",
-            status_code=HTTP_303_SEE_OTHER,
+    if active_captain:
+        active_captain.end_time = now
+    if active_first_officer:
+        active_first_officer.end_time = now
+
+    db.add(
+        CrewAssignment(
+            flight_id=flight_id,
+            user_id=captain_user_id,
+            seat="CAPTAIN",
+            start_time=now,
         )
-
-    if active_assignment:
-        active_assignment.end_time = now
-
-    new_assignment = CrewAssignment(
-        flight_id=flight_id,
-        user_id=new_user_id,
-        seat=seat,
-        start_time=now,
     )
-    db.add(new_assignment)
+    db.add(
+        CrewAssignment(
+            flight_id=flight_id,
+            user_id=first_officer_user_id,
+            seat="FIRST_OFFICER",
+            start_time=now,
+        )
+    )
+
     db.commit()
 
     return RedirectResponse(
