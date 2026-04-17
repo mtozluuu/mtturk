@@ -52,9 +52,9 @@ def test_env(monkeypatch):
             flight_date=date.today(),
             departure_airport="IST",
             arrival_airport="ESB",
-            sched_dep=now + timedelta(hours=1),
-            sched_arr=now + timedelta(hours=2),
-            actual_dep=now - timedelta(minutes=30),
+            sched_dep=now - timedelta(hours=1),
+            sched_arr=now + timedelta(hours=1),
+            actual_dep=now - timedelta(hours=1),
             actual_arr=None,
         )
         inactive_flight = Flight(

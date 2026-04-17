@@ -313,6 +313,15 @@ def translate(request: Request, key: str) -> str:
     return TRANSLATIONS.get(lang, {}).get(key, key)
 
 
+def parse_optional_user_id_form_value(raw_value: str) -> int | None:
+    value = (raw_value or "").strip()
+    if not value:
+        return None
+    if not value.isdigit():
+        raise ValueError
+    return int(value)
+
+
 app = FastAPI(title="Flight Management API", version="1.0.0", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory=os.path.join(_BASE_DIR, "static")), name="static")
@@ -783,14 +792,17 @@ def manage_flight_crew_page(flight_id: int, request: Request):
     return templates.TemplateResponse(
         request,
         "crew_assignment.html",
-        i18n_ctx(request, {
-            "user": user,
-            "flight": flight,
-            "pilots": pilots,
-            "copilots": copilots,
-            "active_assignments": active_assignments,
-            "assignment_history": history_rows,
-        }),
+        i18n_ctx(
+            request,
+            {
+                "user": user,
+                "flight": flight,
+                "pilots": pilots,
+                "copilots": copilots,
+                "active_assignments": active_assignments,
+                "assignment_history": history_rows,
+            },
+        ),
     )
 
 
@@ -809,17 +821,9 @@ def assign_flight_crew(
     if current_user.role != "admin":
         return RedirectResponse(url="/flights-ui", status_code=HTTP_303_SEE_OTHER)
 
-    def parse_optional_user_id(raw_value: str) -> int | None:
-        value = (raw_value or "").strip()
-        if not value:
-            return None
-        if not value.isdigit():
-            raise ValueError
-        return int(value)
-
     try:
-        parsed_captain_user_id = parse_optional_user_id(captain_user_id)
-        parsed_first_officer_user_id = parse_optional_user_id(first_officer_user_id)
+        parsed_captain_user_id = parse_optional_user_id_form_value(captain_user_id)
+        parsed_first_officer_user_id = parse_optional_user_id_form_value(first_officer_user_id)
     except ValueError:
         return RedirectResponse(
             url=f"/admin-ui/flights/{flight_id}/crew?error=user_not_found",
@@ -878,7 +882,7 @@ def assign_flight_crew(
         )
 
     now = datetime.utcnow()
-    changed = False
+    handover_performed = False
 
     if parsed_captain_user_id is not None:
         active_captain = (
@@ -901,7 +905,7 @@ def assign_flight_crew(
                     start_time=now,
                 )
             )
-            changed = True
+            handover_performed = True
 
     if parsed_first_officer_user_id is not None:
         active_first_officer = (
@@ -924,9 +928,9 @@ def assign_flight_crew(
                     start_time=now,
                 )
             )
-            changed = True
+            handover_performed = True
 
-    if changed:
+    if handover_performed:
         db.commit()
 
     return RedirectResponse(
