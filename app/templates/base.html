@@ -322,6 +322,16 @@
             <div class="alert">{{ t("msg.error.invalid_actual_arrival") }}</div>
         {% elif error == "invalid_actual_range" %}
             <div class="alert">{{ t("msg.error.invalid_actual_range") }}</div>
+        {% elif error == "actual_departure_set" %}
+            <div class="alert">{{ t("msg.error.actual_departure_set") }}</div>
+        {% elif error == "actual_arrival_set" %}
+            <div class="alert">{{ t("msg.error.actual_arrival_set") }}</div>
+        {% elif error == "empty_flight_note" %}
+            <div class="alert">{{ t("msg.error.empty_flight_note") }}</div>
+        {% elif error == "invalid_crew_role" %}
+            <div class="alert">{{ t("msg.error.invalid_crew_role") }}</div>
+        {% elif error == "arrival_before_departure" %}
+            <div class="alert">{{ t("msg.error.arrival_before_departure") }}</div>
         {% endif %}
 
         {% if success == "login" %}
@@ -342,6 +352,12 @@
             <div class="success">{{ t("msg.success.crew_updated") }}</div>
         {% elif success == "maintenance_created" %}
             <div class="success">{{ t("msg.success.maintenance_created") }}</div>
+        {% elif success == "actual_departure_marked" %}
+            <div class="success">{{ t("msg.success.actual_departure_marked") }}</div>
+        {% elif success == "actual_arrival_marked" %}
+            <div class="success">{{ t("msg.success.actual_arrival_marked") }}</div>
+        {% elif success == "flight_note_created" %}
+            <div class="success">{{ t("msg.success.flight_note_created") }}</div>
         {% endif %}
 
         {% block content %}{% endblock %}

@@ -16,7 +16,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.status import HTTP_303_SEE_OTHER
 
 from app.database import SessionLocal, get_db
-from app.models import CrewAssignment, Flight, MaintenanceLog, User
+from app.models import CrewAssignment, Flight, FlightNote, MaintenanceLog, User
 from app.routers import admin, auth, flights, reports
 from app.routers.auth import pwd_context
 from app.seed import seed_admin
@@ -49,6 +49,11 @@ TRANSLATIONS = {
         "msg.error.invalid_actual_departure": "Actual departure cannot be earlier than scheduled departure.",
         "msg.error.invalid_actual_arrival": "Actual arrival cannot be earlier than scheduled arrival.",
         "msg.error.invalid_actual_range": "Actual arrival cannot be earlier than actual departure.",
+        "msg.error.actual_departure_set": "Actual departure is already set for this flight.",
+        "msg.error.actual_arrival_set": "Actual arrival is already set for this flight.",
+        "msg.error.empty_flight_note": "Flight note cannot be empty.",
+        "msg.error.invalid_crew_role": "Selected user must have pilot or copilot role.",
+        "msg.error.arrival_before_departure": "Actual arrival cannot be earlier than actual departure.",
 
         "msg.success.login": "Logged in successfully.",
         "msg.success.logout": "Logged out successfully.",
@@ -59,6 +64,9 @@ TRANSLATIONS = {
         "msg.success.role_updated": "User role updated successfully.",
         "msg.success.crew_updated": "Crew assignments updated successfully.",
         "msg.success.maintenance_created": "Maintenance record added successfully.",
+        "msg.success.actual_departure_marked": "Actual departure time marked.",
+        "msg.success.actual_arrival_marked": "Actual arrival time marked.",
+        "msg.success.flight_note_created": "Flight note added successfully.",
         "nav.language": "Language",
         "lang.tr": "Türkçe",
         "lang.en": "English",
@@ -154,6 +162,33 @@ TRANSLATIONS = {
         "crew_assignment.status": "Status",
         "crew_assignment.active": "ACTIVE",
         "crew_assignment.closed": "CLOSED",
+
+        "flight_detail.title": "Flight Operations",
+        "flight_detail.flight": "Flight",
+        "flight_detail.date": "Date",
+        "flight_detail.route": "Route",
+        "flight_detail.planned_departure": "Planned Departure",
+        "flight_detail.planned_arrival": "Planned Arrival",
+        "flight_detail.actual_departure": "Actual Departure",
+        "flight_detail.actual_arrival": "Actual Arrival",
+        "flight_detail.not_set": "Not set",
+        "flight_detail.mark_departure_now": "Mark Departure Now",
+        "flight_detail.mark_arrival_now": "Mark Arrival Now",
+        "flight_detail.quick_actions": "Operational Actions",
+        "flight_detail.crew": "Active Crew",
+        "flight_detail.current_captain": "Current Captain",
+        "flight_detail.current_first_officer": "Current First Officer",
+        "flight_detail.assignments": "Crew Assignment",
+        "flight_detail.captain": "Captain",
+        "flight_detail.first_officer": "First Officer",
+        "flight_detail.select_user": "Select user",
+        "flight_detail.save_assignments": "Update Crew",
+        "flight_detail.notes": "Flight Notes",
+        "flight_detail.new_note": "New Note",
+        "flight_detail.note_placeholder": "Write an operational note...",
+        "flight_detail.add_note": "Add Note",
+        "flight_detail.no_notes": "No flight notes yet.",
+        "flight_detail.unknown_user": "User",
     },
     "tr": {
         "nav.home": "Ana Sayfa",
@@ -180,6 +215,11 @@ TRANSLATIONS = {
         "msg.error.invalid_actual_departure": "Gerçek kalkış, planlanan kalkıştan önce olamaz.",
         "msg.error.invalid_actual_arrival": "Gerçek varış, planlanan varıştan önce olamaz.",
         "msg.error.invalid_actual_range": "Gerçek varış, gerçek kalkıştan önce olamaz.",
+        "msg.error.actual_departure_set": "Bu uçuş için gerçek kalkış zaten işaretlenmiş.",
+        "msg.error.actual_arrival_set": "Bu uçuş için gerçek varış zaten işaretlenmiş.",
+        "msg.error.empty_flight_note": "Uçuş notu boş bırakılamaz.",
+        "msg.error.invalid_crew_role": "Seçilen kullanıcının rolü pilot veya yardımcı pilot olmalıdır.",
+        "msg.error.arrival_before_departure": "Gerçek varış, gerçek kalkıştan önce olamaz.",
 
         "msg.success.login": "Başarıyla giriş yapıldı.",
         "msg.success.logout": "Başarıyla çıkış yapıldı.",
@@ -190,6 +230,9 @@ TRANSLATIONS = {
         "msg.success.role_updated": "Kullanıcı rolü başarıyla güncellendi.",
         "msg.success.crew_updated": "Ekip atamaları başarıyla güncellendi.",
         "msg.success.maintenance_created": "Bakım kaydı başarıyla eklendi.",
+        "msg.success.actual_departure_marked": "Gerçek kalkış saati işaretlendi.",
+        "msg.success.actual_arrival_marked": "Gerçek varış saati işaretlendi.",
+        "msg.success.flight_note_created": "Uçuş notu başarıyla eklendi.",
 
         "nav.language": "Dil",
         "lang.tr": "Türkçe",
@@ -286,6 +329,33 @@ TRANSLATIONS = {
         "crew_assignment.status": "Durum",
         "crew_assignment.active": "AKTİF",
         "crew_assignment.closed": "KAPALI",
+
+        "flight_detail.title": "Uçuş Operasyonu",
+        "flight_detail.flight": "Uçuş",
+        "flight_detail.date": "Tarih",
+        "flight_detail.route": "Rota",
+        "flight_detail.planned_departure": "Planlanan Kalkış",
+        "flight_detail.planned_arrival": "Planlanan Varış",
+        "flight_detail.actual_departure": "Gerçek Kalkış",
+        "flight_detail.actual_arrival": "Gerçek Varış",
+        "flight_detail.not_set": "İşaretlenmedi",
+        "flight_detail.mark_departure_now": "Kalkışı Şimdi İşaretle",
+        "flight_detail.mark_arrival_now": "Varışı Şimdi İşaretle",
+        "flight_detail.quick_actions": "Operasyon Aksiyonları",
+        "flight_detail.crew": "Aktif Ekip",
+        "flight_detail.current_captain": "Mevcut Kaptan",
+        "flight_detail.current_first_officer": "Mevcut Yardımcı Pilot",
+        "flight_detail.assignments": "Ekip Ataması",
+        "flight_detail.captain": "Kaptan",
+        "flight_detail.first_officer": "Yardımcı Pilot",
+        "flight_detail.select_user": "Kullanıcı seçin",
+        "flight_detail.save_assignments": "Ekibi Güncelle",
+        "flight_detail.notes": "Uçuş Notları",
+        "flight_detail.new_note": "Yeni Not",
+        "flight_detail.note_placeholder": "Operasyon notu yazın...",
+        "flight_detail.add_note": "Not Ekle",
+        "flight_detail.no_notes": "Henüz uçuş notu yok.",
+        "flight_detail.unknown_user": "Kullanıcı",
     },
 }
 
@@ -370,6 +440,11 @@ def assignment_duration_seconds(assignment: CrewAssignment, flight: Flight) -> i
 
 def assignment_duration_minutes(assignment: CrewAssignment, flight: Flight) -> int:
     return assignment_duration_seconds(assignment, flight) // 60
+
+
+def normalized_assignment_end_time(start_time: datetime, proposed_end_time: datetime) -> datetime:
+    """Ensure assignment end_time is never earlier than its start_time."""
+    return proposed_end_time if proposed_end_time >= start_time else start_time
 
 
 def format_duration_hms(total_seconds: int) -> str:
@@ -624,14 +699,41 @@ def flight_detail(request: Request, flight_id: int):
         flight = db.query(Flight).filter(Flight.id == flight_id).first()
         if not flight:
             return RedirectResponse(url="/flights-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
-        captain = db.query(User).join(CrewAssignment).filter(
-            CrewAssignment.flight_id == flight_id,
-            CrewAssignment.seat == "CAPTAIN"
-        ).order_by(CrewAssignment.start_time.desc()).first()
-        copilot = db.query(User).join(CrewAssignment).filter(
-            CrewAssignment.flight_id == flight_id,
-            CrewAssignment.seat == "FIRST_OFFICER"
-        ).order_by(CrewAssignment.start_time.desc()).first()
+        captain_assignment = (
+            db.query(CrewAssignment)
+            .options(joinedload(CrewAssignment.user))
+            .filter(
+                CrewAssignment.flight_id == flight_id,
+                CrewAssignment.seat == "CAPTAIN",
+                CrewAssignment.end_time.is_(None),
+            )
+            .order_by(CrewAssignment.start_time.desc())
+            .first()
+        )
+        first_officer_assignment = (
+            db.query(CrewAssignment)
+            .options(joinedload(CrewAssignment.user))
+            .filter(
+                CrewAssignment.flight_id == flight_id,
+                CrewAssignment.seat == "FIRST_OFFICER",
+                CrewAssignment.end_time.is_(None),
+            )
+            .order_by(CrewAssignment.start_time.desc())
+            .first()
+        )
+        crew_candidates = (
+            db.query(User)
+            .filter(User.role.in_(["pilot", "copilot"]))
+            .order_by(User.username)
+            .all()
+        )
+        flight_notes = (
+            db.query(FlightNote)
+            .options(joinedload(FlightNote.user))
+            .filter(FlightNote.flight_id == flight_id)
+            .order_by(FlightNote.created_at.desc())
+            .all()
+        )
     finally:
         db.close()
 
@@ -641,9 +743,242 @@ def flight_detail(request: Request, flight_id: int):
         i18n_ctx(request, {
             "user": user,
             "flight": flight,
-            "captain": captain,
-            "copilot": copilot
+            "captain_assignment": captain_assignment,
+            "first_officer_assignment": first_officer_assignment,
+            "crew_candidates": crew_candidates,
+            "flight_notes": flight_notes,
         }),
+    )
+
+
+@app.post("/flight-detail/{flight_id}/mark-departure", include_in_schema=False)
+def mark_flight_departure_now(
+    flight_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user = get_session_user(request)
+    if user is None:
+        return RedirectResponse(url="/login", status_code=HTTP_303_SEE_OTHER)
+
+    flight = db.query(Flight).filter(Flight.id == flight_id).first()
+    if flight is None:
+        return RedirectResponse(url="/flights-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
+
+    if flight.actual_dep is not None:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=actual_departure_set",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    now = datetime.utcnow()
+    if flight.actual_arr is not None and now >= flight.actual_arr:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=arrival_before_departure",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    flight.actual_dep = now
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/flight-detail/{flight_id}?success=actual_departure_marked",
+        status_code=HTTP_303_SEE_OTHER,
+    )
+
+
+@app.post("/flight-detail/{flight_id}/mark-arrival", include_in_schema=False)
+def mark_flight_arrival_now(
+    flight_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    user = get_session_user(request)
+    if user is None:
+        return RedirectResponse(url="/login", status_code=HTTP_303_SEE_OTHER)
+
+    flight = db.query(Flight).filter(Flight.id == flight_id).first()
+    if flight is None:
+        return RedirectResponse(url="/flights-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
+
+    if flight.actual_arr is not None:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=actual_arrival_set",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    now = datetime.utcnow()
+    if flight.actual_dep is not None and now <= flight.actual_dep:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=arrival_before_departure",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    flight.actual_arr = now
+    open_assignments = (
+        db.query(CrewAssignment)
+        .filter(
+            CrewAssignment.flight_id == flight_id,
+            CrewAssignment.end_time.is_(None),
+        )
+        .all()
+    )
+    for assignment in open_assignments:
+        assignment.end_time = normalized_assignment_end_time(assignment.start_time, now)
+
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/flight-detail/{flight_id}?success=actual_arrival_marked",
+        status_code=HTTP_303_SEE_OTHER,
+    )
+
+
+@app.post("/flight-detail/{flight_id}/notes", include_in_schema=False)
+def add_flight_note(
+    flight_id: int,
+    request: Request,
+    note: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = get_session_user(request)
+    if user is None:
+        return RedirectResponse(url="/login", status_code=HTTP_303_SEE_OTHER)
+
+    flight = db.query(Flight).filter(Flight.id == flight_id).first()
+    if flight is None:
+        return RedirectResponse(url="/flights-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
+
+    stripped_note = note.strip()
+    if not stripped_note:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=empty_flight_note",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    db.add(
+        FlightNote(
+            flight_id=flight_id,
+            user_id=user.id,
+            note=stripped_note,
+        )
+    )
+    db.commit()
+
+    return RedirectResponse(
+        url=f"/flight-detail/{flight_id}?success=flight_note_created",
+        status_code=HTTP_303_SEE_OTHER,
+    )
+
+
+@app.post("/flight-detail/{flight_id}/crew", include_in_schema=False)
+def update_flight_detail_crew(
+    flight_id: int,
+    request: Request,
+    captain_user_id: str = Form(...),
+    first_officer_user_id: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = get_session_user(request)
+    if user is None:
+        return RedirectResponse(url="/login", status_code=HTTP_303_SEE_OTHER)
+
+    flight = db.query(Flight).filter(Flight.id == flight_id).first()
+    if flight is None:
+        return RedirectResponse(url="/flights-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
+
+    try:
+        parsed_captain_user_id = parse_optional_user_id_form_value(captain_user_id)
+        parsed_first_officer_user_id = parse_optional_user_id_form_value(first_officer_user_id)
+    except ValueError:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=user_not_found",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    if parsed_captain_user_id is None or parsed_first_officer_user_id is None:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=missing_crew_selection",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    if parsed_captain_user_id == parsed_first_officer_user_id:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=same_personnel",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    selected_users = (
+        db.query(User)
+        .filter(User.id.in_([parsed_captain_user_id, parsed_first_officer_user_id]))
+        .all()
+    )
+    selected_user_map = {selected_user.id: selected_user for selected_user in selected_users}
+    captain_user = selected_user_map.get(parsed_captain_user_id)
+    first_officer_user = selected_user_map.get(parsed_first_officer_user_id)
+
+    if captain_user is None or first_officer_user is None:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=user_not_found",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    allowed_roles = {"pilot", "copilot"}
+    if captain_user.role not in allowed_roles or first_officer_user.role not in allowed_roles:
+        return RedirectResponse(
+            url=f"/flight-detail/{flight_id}?error=invalid_crew_role",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    now = datetime.utcnow()
+
+    active_captain = (
+        db.query(CrewAssignment)
+        .filter(
+            CrewAssignment.flight_id == flight_id,
+            CrewAssignment.seat == "CAPTAIN",
+            CrewAssignment.end_time.is_(None),
+        )
+        .first()
+    )
+    active_first_officer = (
+        db.query(CrewAssignment)
+        .filter(
+            CrewAssignment.flight_id == flight_id,
+            CrewAssignment.seat == "FIRST_OFFICER",
+            CrewAssignment.end_time.is_(None),
+        )
+        .first()
+    )
+
+    if active_captain is None or active_captain.user_id != parsed_captain_user_id:
+        if active_captain is not None:
+            active_captain.end_time = now
+        db.add(
+            CrewAssignment(
+                flight_id=flight_id,
+                user_id=parsed_captain_user_id,
+                seat="CAPTAIN",
+                start_time=now,
+            )
+        )
+
+    if active_first_officer is None or active_first_officer.user_id != parsed_first_officer_user_id:
+        if active_first_officer is not None:
+            active_first_officer.end_time = now
+        db.add(
+            CrewAssignment(
+                flight_id=flight_id,
+                user_id=parsed_first_officer_user_id,
+                seat="FIRST_OFFICER",
+                start_time=now,
+            )
+        )
+
+    db.commit()
+    return RedirectResponse(
+        url=f"/flight-detail/{flight_id}?success=crew_updated",
+        status_code=HTTP_303_SEE_OTHER,
     )
 
 @app.get("/admin-ui", include_in_schema=False)
@@ -769,8 +1104,12 @@ def manage_flight_crew_page(flight_id: int, request: Request):
         if flight is None:
             return RedirectResponse(url="/admin-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
 
-        pilots = db.query(User).filter(User.role == "pilot").order_by(User.username).all()
-        copilots = db.query(User).filter(User.role == "copilot").order_by(User.username).all()
+        crew_users = (
+            db.query(User)
+            .filter(User.role.in_(["pilot", "copilot"]))
+            .order_by(User.username)
+            .all()
+        )
 
         active_assignments = (
             db.query(CrewAssignment)
@@ -821,8 +1160,8 @@ def manage_flight_crew_page(flight_id: int, request: Request):
             {
                 "user": user,
                 "flight": flight,
-                "pilots": pilots,
-                "copilots": copilots,
+                "pilots": crew_users,
+                "copilots": crew_users,
                 "active_assignments": active_assignments,
                 "assignment_history": history_rows,
             },
@@ -897,11 +1236,12 @@ def assign_flight_crew(
             status_code=HTTP_303_SEE_OTHER,
         )
 
-    if (captain_user is not None and captain_user.role != "pilot") or (
-        first_officer_user is not None and first_officer_user.role != "copilot"
+    if (
+        (captain_user is not None and captain_user.role not in {"pilot", "copilot"})
+        or (first_officer_user is not None and first_officer_user.role not in {"pilot", "copilot"})
     ):
         return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=role_mismatch",
+            url=f"/admin-ui/flights/{flight_id}/crew?error=invalid_crew_role",
             status_code=HTTP_303_SEE_OTHER,
         )
 
@@ -995,10 +1335,25 @@ def change_flight_crew(
             status_code=HTTP_303_SEE_OTHER,
         )
 
-    required_role = "pilot" if seat == "CAPTAIN" else "copilot"
-    if new_user.role != required_role:
+    if new_user.role not in {"pilot", "copilot"}:
         return RedirectResponse(
-            url=f"/admin-ui/flights/{flight_id}/crew?error=role_mismatch",
+            url=f"/admin-ui/flights/{flight_id}/crew?error=invalid_crew_role",
+            status_code=HTTP_303_SEE_OTHER,
+        )
+
+    opposite_seat = "FIRST_OFFICER" if seat == "CAPTAIN" else "CAPTAIN"
+    opposite_active_assignment = (
+        db.query(CrewAssignment)
+        .filter(
+            CrewAssignment.flight_id == flight_id,
+            CrewAssignment.seat == opposite_seat,
+            CrewAssignment.end_time.is_(None),
+        )
+        .first()
+    )
+    if opposite_active_assignment is not None and opposite_active_assignment.user_id == new_user_id:
+        return RedirectResponse(
+            url=f"/admin-ui/flights/{flight_id}/crew?error=same_personnel",
             status_code=HTTP_303_SEE_OTHER,
         )
 
@@ -1386,7 +1741,7 @@ def edit_flight_page(flight_id: int, request: Request):
     return templates.TemplateResponse(
         request,
         "edit_flight.html",
-        {"user": user, "flight": flight},
+        i18n_ctx(request, {"user": user, "flight": flight}),
     )
 
 
@@ -1468,8 +1823,10 @@ def edit_flight_from_form(
         )
 
         for assignment in open_assignments:
-            if parsed_actual_arr >= assignment.start_time:
-                assignment.end_time = parsed_actual_arr
+            assignment.end_time = normalized_assignment_end_time(
+                assignment.start_time,
+                parsed_actual_arr,
+            )
 
     db.commit()
 
@@ -1504,11 +1861,14 @@ def maintenance_page(flight_id: int, request: Request):
     return templates.TemplateResponse(
         request,
         "maintenance.html",
-        {
-            "user": user,
-            "flight": flight,
-            "logs": logs,
-        },
+        i18n_ctx(
+            request,
+            {
+                "user": user,
+                "flight": flight,
+                "logs": logs,
+            },
+        ),
     )
 
 

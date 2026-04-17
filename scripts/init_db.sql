@@ -44,3 +44,12 @@ CREATE TABLE IF NOT EXISTS maintenance_logs (
     description TEXT NOT NULL,
     logged_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Flight operational notes table
+CREATE TABLE IF NOT EXISTS flight_notes (
+    id SERIAL PRIMARY KEY,
+    flight_id INTEGER NOT NULL REFERENCES flights(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    note TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
