@@ -787,14 +787,17 @@ def manage_flight_crew_page(flight_id: int, request: Request):
     return templates.TemplateResponse(
         request,
         "crew_assignment.html",
-        {
-            "user": user,
-            "flight": flight,
-            "pilots": pilots,
-            "copilots": copilots,
-            "active_assignments": active_assignments,
-            "assignment_history": history_rows,
-        },
+        i18n_ctx(
+            request,
+            {
+                "user": user,
+                "flight": flight,
+                "pilots": pilots,
+                "copilots": copilots,
+                "active_assignments": active_assignments,
+                "assignment_history": history_rows,
+            },
+        ),
     )
 
 
