@@ -443,6 +443,7 @@ def assignment_duration_minutes(assignment: CrewAssignment, flight: Flight) -> i
 
 
 def normalized_assignment_end_time(start_time: datetime, proposed_end_time: datetime) -> datetime:
+    """Ensure assignment end_time is never earlier than its start_time."""
     return proposed_end_time if proposed_end_time >= start_time else start_time
 
 
