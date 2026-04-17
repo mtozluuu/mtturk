@@ -67,7 +67,17 @@ def test_env(monkeypatch):
             actual_dep=now - timedelta(hours=3),
             actual_arr=now - timedelta(hours=1),
         )
-        session.add_all([active_flight, inactive_flight])
+        not_departed_flight = Flight(
+            flight_no="TK300",
+            flight_date=date.today(),
+            departure_airport="IST",
+            arrival_airport="ADB",
+            sched_dep=now + timedelta(hours=2),
+            sched_arr=now + timedelta(hours=3),
+            actual_dep=None,
+            actual_arr=None,
+        )
+        session.add_all([active_flight, inactive_flight, not_departed_flight])
         session.flush()
 
         session.add_all(
@@ -105,6 +115,7 @@ def test_env(monkeypatch):
         ids = {
             "active_flight_id": active_flight.id,
             "inactive_flight_id": inactive_flight.id,
+            "not_departed_flight_id": not_departed_flight.id,
             "pilot_1_id": pilot_1.id,
             "pilot_2_id": pilot_2.id,
             "copilot_1_id": copilot_1.id,
@@ -306,4 +317,23 @@ def test_handover_rejects_non_active_flight(test_env):
     session = SessionLocal()
     assert len(_assignments_for(session, ids["inactive_flight_id"], "CAPTAIN")) == 1
     assert len(_assignments_for(session, ids["inactive_flight_id"], "FIRST_OFFICER")) == 1
+    session.close()
+
+
+def test_handover_rejects_not_departed_flight(test_env):
+    client, SessionLocal, ids = test_env
+    response = client.post(
+        f"/admin-ui/flights/{ids['not_departed_flight_id']}/crew",
+        data={"captain_user_id": str(ids["pilot_2_id"]), "first_officer_user_id": ""},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"].endswith(
+        f"/admin-ui/flights/{ids['not_departed_flight_id']}/crew?error=inactive_flight"
+    )
+
+    session = SessionLocal()
+    assert len(_assignments_for(session, ids["not_departed_flight_id"], "CAPTAIN")) == 0
+    assert len(_assignments_for(session, ids["not_departed_flight_id"], "FIRST_OFFICER")) == 0
     session.close()

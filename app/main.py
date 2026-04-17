@@ -850,7 +850,7 @@ def assign_flight_crew(
     if flight is None:
         return RedirectResponse(url="/admin-ui?error=flight_not_found", status_code=HTTP_303_SEE_OTHER)
 
-    if flight.actual_arr is not None:
+    if flight.actual_dep is None or flight.actual_arr is not None:
         return RedirectResponse(
             url=f"/admin-ui/flights/{flight_id}/crew?error=inactive_flight",
             status_code=HTTP_303_SEE_OTHER,
@@ -930,8 +930,7 @@ def assign_flight_crew(
             )
             handover_performed = True
 
-    if handover_performed:
-        db.commit()
+    db.commit()
 
     return RedirectResponse(
         url=f"/admin-ui/flights/{flight_id}/crew?success=crew_updated",
